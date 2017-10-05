@@ -46,3 +46,15 @@ class Graph(object):
 		return Graph(feature_file, graph_file, cluster_file, stay_prob)
 
 
+def plot(data, cluster, plot_file):
+	colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+	assert len(set(cluster)) <= len(colors)
+	points_set = []
+	for cl in range(len(set(cluster))):
+		points_set.append(np.array([p for p, c in zip(data, cluster) if c == cl]))
+	plt.figure()
+	for i, points in enumerate(points_set):
+		plt.scatter(points[:, 0], points[:, 1], c=colors[i])
+	plt.savefig(plot_file)
+	plt.close()
+
