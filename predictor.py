@@ -4,7 +4,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MultiLabelBinarizer
 from utils import *
 from DEC import DEC
 
@@ -38,7 +38,7 @@ class Predictor(object):
 
 	def evaluate(self):
 		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
-		self.prediction = OneHotEncoder().fit_transform(kmeans.labels_)
+		self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
 
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
