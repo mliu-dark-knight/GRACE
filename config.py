@@ -11,6 +11,10 @@ def parse_args():
 	parser.add_argument('--learning_rate', default=1e-3, help=None)
 	parser.add_argument('--epoch', default=2, help=None)
 	parser.add_argument('--step', default=200, help=None)
+	parser.add_argument('--dataset', default='cora', help=None)
 	return parser.parse_args()
 
 args = parse_args()
+args.feature_file = 'data/' + args.dataset + '/feature.txt'
+args.edge_file = 'data/' + args.dataset + '/edge.txt'
+args.cluster_file = 'data/' + args.dataset + '/cluster.txt'
