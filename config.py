@@ -20,7 +20,7 @@ def parse_args():
 
 args = parse_args()
 data_dir = 'data/' + args.dataset + '/' if sys.platform == 'darwin' else \
-	'/shared/data/' + getpass.getuser() + '/DEC/data/'
+	'/shared/data/' + getpass.getuser() + '/DEC/data/' + args.dataset + '/'
 args.feature_file = data_dir + 'feature.txt'
 args.edge_file = data_dir + 'edge.txt'
 args.cluster_file = data_dir + '/cluster.txt'
