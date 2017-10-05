@@ -11,9 +11,6 @@ def weight(name, shape, init='he'):
 def bias(name, dim, initial_value=1e-2):
 	return tf.get_variable(name, dim, initializer=tf.constant_initializer(initial_value))
 
-def embedding(name, shape):
-	return tf.get_variable(name, shape, initializer=tf.random_uniform_initializer(minval=-0.5 / shape[1], maxval=0.5 / shape[1]))
-
 def fully_connected(input, num_neurons, name, activation='elu'):
 	func = {'tanh': tflearn.activations.tanh, 'linear': tflearn.activations.linear, 'relu': tflearn.activations.relu,
 	        'elu': tflearn.activations.elu, 'lrelu': tflearn.activations.leaky_relu, 'selu': tflearn.activations.selu}

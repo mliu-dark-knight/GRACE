@@ -10,12 +10,12 @@ class DEC(object):
 		self.build_loss()
 
 	def build_variable(self, graph):
-		self.X = tf.Variable(tf.int32, [self.paras.num_node, self.paras.feat_dim], trainable=False)
+		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		self.graph = tf.SparseTensor(indices=graph.indices, values=graph.values, dense_shape=[self.paras.num_node, self.paras.num_node])
+		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
 		self.Z = self.encode()
 		self.Q = self.build_Q()
-		self.mean = tf.Variable(tf.float32, [self.paras.num_cluster, self.paras.embed_dim])
 
 	def build_loss(self):
 		X_p = self.decode()
@@ -27,18 +27,18 @@ class DEC(object):
 		Z = self.random_walk()
 		Z = tf.tile(tf.expand_dims(Z, 1), tf.stack([1, self.paras.num_cluster, 1]))
 		Q = 1.0 / (tf.reduce_sum(Z - self.mean, axis=2) + 1.0)
-		return Q / tf.reduce_sum(Q, axis=1)
+		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
 
 	def loss_r(self, X_p):
 		return tf.squared_difference(self.X, X_p)
 
 	def loss_c(self):
-		return tf.contrib.distributions.kl(self.P, self.Q)
+		return tf.reduce_sum(self.P * tf.log(self.P / self.Q))
 
 	def random_walk(self):
 		Z = self.Z
 		for i in range(self.paras.random_walk_step):
-			Z = tf.matmul(Z, self.graph, b_is_sparse=True)
+			Z = tf.sparse_tensor_dense_matmul(self.graph, Z)
 		return Z
 
 	def encode(self):
@@ -59,9 +59,9 @@ class DEC(object):
 	def init_mean(self, mean, sess):
 		sess.run(self.mean.assign(mean))
 
-	def init_X_graph(self, X, graph, sess):
-		sess.run([self.X.assign(X), self.graph.assign(graph)])
-
 	def get_P(self, sess):
 		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
-		return sess.run(P / tf.reduce_sum(P, axis=1))
+		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True))
+
+	def predict(self, sess):
+		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0))
