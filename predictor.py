@@ -43,7 +43,7 @@ class Predictor(object):
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
 		with open(self.paras.predict_file, 'w') as f:
-			for prediction in np.transpose(self.prediction):
+			for prediction in self.prediction:
 				f.write(','.join(map(str, prediction)) + '\n')
 
 	def tSNE(self):
