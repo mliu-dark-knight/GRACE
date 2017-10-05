@@ -62,6 +62,3 @@ class DEC(object):
 	def get_P(self, sess):
 		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
 		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True))
-
-	def predict(self, sess):
-		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0))

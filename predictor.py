@@ -4,9 +4,9 @@ from copy import deepcopy
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
+from sklearn.preprocessing import OneHotEncoder
 from utils import *
 from DEC import DEC
-from evaluate import f1_community, jc_community, nmi_community
 
 
 class Predictor(object):
@@ -32,21 +32,18 @@ class Predictor(object):
 				for _ in range(self.paras.step):
 					sess.run(model.gradient_descent, feed_dict={model.P: P})
 			self.embedding = model.get_embedding(sess)
-			self.prediction = model.predict(sess)
 
 	def plot(self):
 		plot(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
 
 	def evaluate(self):
-		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
-		print 'f1 score %f' % f1_community(prediction, ground_truth)
-		print 'jc score %f' % jc_community(prediction, ground_truth)
-		print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
+		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
+		self.prediction = OneHotEncoder().fit_transform(kmeans.labels_)
 
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
 		with open(self.paras.predict_file, 'w') as f:
-			for prediction in self.prediction:
+			for prediction in np.transpose(self.prediction):
 				f.write(','.join(map(str, prediction)) + '\n')
 
 	def tSNE(self):
