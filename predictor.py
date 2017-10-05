@@ -38,7 +38,7 @@ class Predictor(object):
 		plot(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
 
 	def evaluate(self):
-		prediction, ground_truth = self.prediction[:100], self.graph.cluster[:100]
+		prediction, ground_truth = self.prediction[:10], self.graph.cluster[:10]
 		print 'f1 score %f' % f1_community(prediction, ground_truth)
 		print 'jc score %f' % jc_community(prediction, ground_truth)
 		print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
