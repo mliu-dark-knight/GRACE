@@ -25,7 +25,7 @@ class Predictor(object):
 		model = DEC(self.paras, self.graph)
 		with tf.Session() as sess:
 			sess.run(tf.global_variables_initializer())
-			for _ in range(self.paras.pre_epoch):
+			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 				for _ in range(self.paras.pre_step):
 					sess.run(model.pre_gradient_descent)
 			print 'reconstruction loss: %f' % sess.run(model.loss_r)
