@@ -10,7 +10,7 @@ def parse_args():
 	parser.add_argument('--decoder_hidden', default=[1024], help='Decoder hidden layer dimension')
 	parser.add_argument('--random_walk_step', default=2, help=None)
 	parser.add_argument('--stay_prob', default=0.8, help='Probability of staying at current node')
-	parser.add_argument('--lambda_r', default=1.0, help='Reconstruct loss coefficient')
+	parser.add_argument('--lambda_r', default=0.1, help='Reconstruct loss coefficient')
 	parser.add_argument('--lambda_c', default=1.0, help='Clustering loss coefficient')
 	parser.add_argument('--learning_rate', default=1e-3, help=None)
 	parser.add_argument('--pre_epoch', default=20, help=None)

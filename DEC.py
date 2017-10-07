@@ -34,10 +34,10 @@ class DEC(object):
 		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
 
 	def loss_r(self, X_p):
-		return tf.reduce_mean(tf.reduce_sum(tf.squared_difference(self.X, X_p), axis=1))
+		return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.X, logits=X_p))
 
 	def loss_c(self):
-		loss_c = tf.reduce_sum(self.P * tf.log(self.P / self.Q))
+		loss_c = tf.reduce_mean(self.P * tf.log(self.P / self.Q))
 		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
 		return loss_c
 
@@ -57,7 +57,7 @@ class DEC(object):
 		hidden = self.Z
 		for i, dim in enumerate(self.paras.decoder_hidden):
 			hidden = fully_connected(hidden, dim, 'decoder_' + str(i))
-		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='sigmoid')
+		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')
 
 	def get_embedding(self, sess):
 		return sess.run(self.Z)
