@@ -24,6 +24,11 @@ class Predictor(object):
 		model = DEC(self.paras, self.graph)
 		with tf.Session() as sess:
 			sess.run(tf.global_variables_initializer())
+			for _ in range(self.paras.pre_epoch):
+				for _ in range(self.paras.pre_step):
+					sess.run(model.pre_gradient_descent)
+			print 'reconstruction loss: %f' % sess.run(model.loss_r)
+
 			Z = sess.run(model.Z)
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
 			model.init_mean(kmeans.cluster_centers_, sess)
@@ -31,6 +36,8 @@ class Predictor(object):
 				P = model.get_P(sess)
 				for _ in range(self.paras.step):
 					sess.run(model.gradient_descent, feed_dict={model.P: P})
+			P = model.get_P(sess)
+			print 'clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P})
 			self.embedding = model.get_embedding(sess)
 
 	def plot(self):
