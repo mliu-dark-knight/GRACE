@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import MultiLabelBinarizer
 from utils import *
 from DEC import DEC
+from evaluate import f1_community, jc_community, nmi_community
 
 
 class Predictor(object):
@@ -46,6 +47,10 @@ class Predictor(object):
 	def evaluate(self):
 		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
 		self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
+		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
+		print 'f1 score %f' % f1_community(prediction, ground_truth)
+		print 'jc score %f' % jc_community(prediction, ground_truth)
+		print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
 
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
