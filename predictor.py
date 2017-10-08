@@ -40,17 +40,18 @@ class Predictor(object):
 			P = model.get_P(sess)
 			print 'clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P})
 			self.embedding = model.get_embedding(sess)
+			self.prediction = model.predict(sess)
+			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
+			# self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
 
 	def plot(self):
 		plot(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
 
 	def evaluate(self):
-		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
-		self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
 		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
-		# print 'f1 score %f' % f1_community(prediction, ground_truth)
-		# print 'jc score %f' % jc_community(prediction, ground_truth)
-		# print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
+		print 'f1 score %f' % f1_community(prediction, ground_truth)
+		print 'jc score %f' % jc_community(prediction, ground_truth)
+		print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
 
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))

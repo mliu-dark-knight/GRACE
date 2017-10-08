@@ -1,9 +1,7 @@
-#carl yang @ Oct 2017
-#use nmi_community, f1_community, jc_community to evaluate predictions against ground truth
-#other functions are intermidiate tools
-
 import math
 import numpy as np
+import sys
+import csv
 
 def h_utils(w, n):
     if 0 == w:
@@ -79,7 +77,7 @@ def f1_community(pre_ys, true_ys):
         cur_size = sum(pre_y)
         tot_size += cur_size
         tot_fscore += max([f1_pair(pre_y, true_y)[0] for true_y in true_ys]) * cur_size
-    return tot_fscore / tot_size
+    return float(tot_fscore) / tot_size
 
 
 def jc_pair(pred_y, true_y):
@@ -93,7 +91,7 @@ def jc_pair(pred_y, true_y):
     if 0 == corrected:
         return 0
     tot = sum([ (py + ty) > 0 for (py, ty) in zip(pred_y, true_y)])
-    return corrected / tot
+    return float(corrected) / tot
 
 def jc_community(pre_ys, true_ys):
     """calculate jc score for two sets of communities (predicted and ground truth)
@@ -115,22 +113,48 @@ def jc_community(pre_ys, true_ys):
     return tot_jcscore
 
 if __name__ == "__main__":
-    y = [[1, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]]
-    x1 = [[0, 1, 0, 1, 1], [1, 1, 0, 1, 0], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]] #same
-    x2 = [[1, 1, 1, 1, 0], [0, 1, 0, 1, 1], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]] #1 error
-    x3 = [[0, 0, 0, 1, 1], [0, 0, 0, 1, 1], [0, 0, 0, 1, 1], [0, 0, 0, 1, 1]] #lots of error
+    if len(sys.argv) == 3:
+        with open(sys.argv[1], 'rb') as truthfile:
+            truthreader = csv.reader(truthfile)
+            truth = []
+            for line in truthreader:
+                row = []
+                for element in line:
+                    row.append(int(element))
+                truth.append(row)
 
-    print('f1 score:')
-    print(f1_community(x1, y))
-    print(f1_community(x2, y))
-    print(f1_community(x3, y))
+        with open(sys.argv[2], 'rb') as predfile:
+            predreader = csv.reader(predfile)
+            pred = []
+            for line in predreader:
+                row = []
+                for element in line:
+                    row.append(int(element))
+                pred.append(row)
 
-    print('jc score:')
-    print(jc_community(x1, y))
-    print(jc_community(x2, y))
-    print(jc_community(x3, y))
+        print('f1 score:')
+        print(f1_community(pred, truth))
+        print('jc score:')
+        print(jc_community(pred, truth))
+        print('nmi score:')
+        print(nmi_community(pred, truth))
+    else:
+        y = [[1, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]]
+        x1 = [[0, 1, 0, 1, 1], [1, 1, 0, 1, 0], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]] #same
+        x2 = [[1, 1, 1, 1, 0], [0, 1, 0, 1, 1], [1, 0, 0, 0, 1], [0, 0, 0, 1, 0]] #1 error
+        x3 = [[0, 0, 0, 1, 1], [0, 0, 0, 1, 1], [0, 0, 0, 1, 1], [0, 0, 0, 1, 1]] #lots of error
 
-    print('nmi score:')
-    print(nmi_community(x1, y))
-    print(nmi_community(x2, y))
-    print(nmi_community(x3, y))
+        print('f1 score:')
+        print(f1_community(x1, y))
+        print(f1_community(x2, y))
+        print(f1_community(x3, y))
+
+        print('jc score:')
+        print(jc_community(x1, y))
+        print(jc_community(x2, y))
+        print(jc_community(x3, y))
+
+        print('nmi score:')
+        print(nmi_community(x1, y))
+        print(nmi_community(x2, y))
+        print(nmi_community(x3, y))

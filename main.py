@@ -7,4 +7,4 @@ if __name__ == '__main__':
 	predictor.train()
 	predictor.evaluate()
 	# predictor.plot()
-	predictor.dump()
+	# predictor.dump()
