@@ -15,19 +15,19 @@ class Graph(object):
 		self.feature = []
 		with open(feature_file) as f:
 			for line in f:
-				self.feature.append(np.array(map(int, line.rstrip().split(','))))
+				self.feature.append(np.array(list(map(int, line.rstrip().split(',')))))
 		self.feature = np.array(self.feature)
 
 		self.cluster = []
 		with open(cluster_file) as f:
 			for line in f:
-				self.cluster.append(np.array(map(int, line.rstrip().split(','))))
+				self.cluster.append(np.array(list(map(int, line.rstrip().split(',')))))
 		self.cluster = np.array(self.cluster)
 
 		edges = defaultdict(list)
 		with open(edge_file) as f:
 			for line in f:
-				tuple = map(int, line.rstrip().split(','))
+				tuple = list(map(int, line.rstrip().split(',')))
 				assert len(tuple) == 2
 				edges[tuple[0]].append(tuple[1])
 				edges[tuple[1]].append(tuple[0])
