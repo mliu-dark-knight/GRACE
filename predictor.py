@@ -1,6 +1,6 @@
+from __future__ import print_function
 import pickle
 import tensorflow as tf
-from __future__ import print_function
 from copy import deepcopy
 from tqdm import tqdm
 from sklearn.cluster import KMeans
