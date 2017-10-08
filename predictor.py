@@ -25,6 +25,7 @@ class Predictor(object):
 	def train(self):
 		model = DEC(self.paras, self.graph)
 		with tf.Session() as sess:
+			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 				for _ in range(self.paras.pre_step):

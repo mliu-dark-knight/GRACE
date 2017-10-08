@@ -14,7 +14,7 @@ class DEC(object):
 		self.graph = tf.SparseTensor(indices=graph.indices, values=graph.values, dense_shape=[self.paras.num_node, self.paras.num_node])
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
-		self.Z = self.encode()
+		self.Z = self.random_walk(self.encode())
 		self.Q = self.build_Q()
 
 	def build_loss(self):
@@ -28,21 +28,21 @@ class DEC(object):
 		self.gradient_descent = optimizer.minimize(loss)
 
 	def build_Q(self):
-		Z = self.random_walk()
+		Z = self.Z
 		Z = tf.tile(tf.expand_dims(Z, 1), tf.stack([1, self.paras.num_cluster, 1]))
 		Q = 1.0 / (tf.reduce_sum(tf.squared_difference(Z, self.mean), axis=2) + 1.0)
 		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
 
 	def loss_r(self, X_p):
-		return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.X, logits=X_p))
+		# todo: check this
+		return tf.reduce_mean(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.X, logits=X_p), axis=1))
 
 	def loss_c(self):
 		loss_c = tf.reduce_mean(self.P * tf.log(self.P / self.Q))
 		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
 		return loss_c
 
-	def random_walk(self):
-		Z = self.Z
+	def random_walk(self, Z):
 		for i in range(self.paras.random_walk_step):
 			Z = tf.sparse_tensor_dense_matmul(self.graph, Z)
 		return Z
