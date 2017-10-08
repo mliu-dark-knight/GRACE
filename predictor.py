@@ -1,5 +1,6 @@
 import pickle
 import tensorflow as tf
+from __future__ import print_function
 from copy import deepcopy
 from tqdm import tqdm
 from sklearn.cluster import KMeans
@@ -28,7 +29,7 @@ class Predictor(object):
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 				for _ in range(self.paras.pre_step):
 					sess.run(model.pre_gradient_descent)
-			print 'reconstruction loss: %f' % sess.run(model.loss_r)
+			print('reconstruction loss: %f' % sess.run(model.loss_r))
 
 			Z = sess.run(model.Z)
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
@@ -38,7 +39,7 @@ class Predictor(object):
 				for _ in range(self.paras.step):
 					sess.run(model.gradient_descent, feed_dict={model.P: P})
 			P = model.get_P(sess)
-			print 'clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P})
+			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
 			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
@@ -48,10 +49,10 @@ class Predictor(object):
 		plot(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
 
 	def evaluate(self):
-		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
-		print 'f1 score %f' % f1_community(prediction, ground_truth)
-		print 'jc score %f' % jc_community(prediction, ground_truth)
-		print 'nmi score %f' % nmi_community(self.prediction, ground_truth)
+		prediction, ground_truth = np.transpose(self.prediction[:10]), np.transpose(self.graph.cluster[:10])
+		print('f1 score %f' % f1_community(prediction, ground_truth))
+		print('jc score %f' % jc_community(prediction, ground_truth))
+		print('nmi score %f' % nmi_community(prediction, ground_truth))
 
 	def dump(self):
 		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))

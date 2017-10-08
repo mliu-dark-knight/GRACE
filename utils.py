@@ -21,7 +21,8 @@ class Graph(object):
 		self.cluster = []
 		with open(cluster_file) as f:
 			for line in f:
-				self.cluster.append(map(int, line.rstrip().split(',')))
+				self.cluster.append(np.array(map(int, line.rstrip().split(','))))
+		self.cluster = np.array(self.cluster)
 
 		edges = defaultdict(list)
 		with open(edge_file) as f:
