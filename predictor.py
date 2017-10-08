@@ -34,10 +34,16 @@ class Predictor(object):
 			Z = sess.run(model.Z)
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
 			model.init_mean(kmeans.cluster_centers_, sess)
+
+			self.diff = []
+			s_prev = model.predict(sess)
 			for _ in tqdm(range(self.paras.epoch), ncols=100):
 				P = model.get_P(sess)
 				for _ in range(self.paras.step):
 					sess.run(model.gradient_descent, feed_dict={model.P: P})
+				s = model.predict(sess)
+				self.diff.append(np.sum(s_prev != s) / 2.0)
+				s_prev = s
 			P = model.get_P(sess)
 			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P}))
 			self.embedding = model.get_embedding(sess)
@@ -46,10 +52,11 @@ class Predictor(object):
 			# self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
 
 	def plot(self):
-		plot(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
+		# scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
+		plot(self.diff, self.paras.plot_file)
 
 	def evaluate(self):
-		prediction, ground_truth = np.transpose(self.prediction[:10]), np.transpose(self.graph.cluster[:10])
+		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
 		print('f1 score %f' % f1_community(prediction, ground_truth))
 		print('jc score %f' % jc_community(prediction, ground_truth))
 		print('nmi score %f' % nmi_community(prediction, ground_truth))

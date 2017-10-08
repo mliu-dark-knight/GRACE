@@ -46,7 +46,7 @@ class Graph(object):
 		return Graph(feature_file, graph_file, cluster_file, stay_prob)
 
 
-def plot(data, cluster, plot_file):
+def scatter(data, cluster, plot_file):
 	colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 	assert len(set(cluster)) <= len(colors)
 	points_set = []
@@ -58,3 +58,8 @@ def plot(data, cluster, plot_file):
 	plt.savefig(plot_file)
 	plt.close()
 
+def plot(data, plot_file):
+	plt.figure()
+	plt.plot(range(len(data)), data)
+	plt.savefig(plot_file)
+	plt.close()
