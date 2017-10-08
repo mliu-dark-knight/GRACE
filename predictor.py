@@ -62,7 +62,7 @@ class Predictor(object):
 		print('nmi score %f' % nmi_community(prediction, ground_truth))
 
 	def dump(self):
-		pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
+		# pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
 		with open(self.paras.predict_file, 'w') as f:
 			for prediction in self.prediction:
 				f.write(','.join(map(str, prediction)) + '\n')
