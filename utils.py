@@ -22,27 +22,34 @@ class Graph(object):
 				cluster.append(np.array(list(map(int, line.rstrip().split(',')))))
 		self.cluster = np.array(cluster)
 
-		edges = defaultdict(list)
+		edges = defaultdict(set)
 		with open(edge_file) as f:
 			for line in f:
 				tuple = list(map(int, line.rstrip().split(',')))
 				assert len(tuple) == 2
-				edges[tuple[0]].append(tuple[1])
-				edges[tuple[1]].append(tuple[0])
+				edges[tuple[0]].add(tuple[1])
+				edges[tuple[1]].add(tuple[0])
+		for v, ns in edges.items():
+			assert v not in ns
+			edges[v].add(v)
 
-		indices, T_values, L1_values, L2_values = [], [], [], []
+		indices, T1_values, T2_values, L1_values, L2_values = [], [], [], [], []
 		for v, ns in edges.items():
 			indices.append(np.array([v, v]))
-			T_values.append(stay_prob)
+			T1_values.append(stay_prob)
+			T2_values.append(stay_prob)
 			L1_values.append(1.0)
 			L2_values.append(1.0)
 			for n in ns:
 				indices.append(np.array([v, n]))
-				T_values.append((1.0 - stay_prob) / len(ns))
+				T1_values.append((1.0 - stay_prob) / len(ns))
+				T2_values.append((1.0 - stay_prob) / len(edges[n]))
 				L1_values.append(1.0 - 1.0 / len(ns))
 				L2_values.append(1.0 + 1.0 / len(ns))
+
 		self.indices = np.array(indices)
-		self.T_values = np.asarray(T_values, dtype=np.float32)
+		self.T1_values = np.asarray(T1_values, dtype=np.float32)
+		self.T2_values = np.asarray(T2_values, dtype=np.float32)
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)

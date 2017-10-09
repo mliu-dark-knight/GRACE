@@ -12,8 +12,10 @@ class DEC(object):
 	def build_variable(self, graph):
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		dense_shape = [self.paras.num_node, self.paras.num_node]
-		# transition matrix
-		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
+		# random walk outgoing
+		self.T1 = tf.SparseTensor(indices=graph.indices, values=graph.T1_values, dense_shape=dense_shape)
+		# random walk incoming
+		self.T2 = tf.SparseTensor(indices=graph.indices, values=graph.T2_values, dense_shape=dense_shape)
 		# graph Laplacian 1
 		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
