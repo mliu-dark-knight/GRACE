@@ -59,8 +59,9 @@ class Graph(object):
 					T2_indices.append(np.array([n, v]))
 					L1_indices.append(np.array([v, n]))
 					L2_indices.append(np.array([v, n]))
-					row.append(v)
-					col.append(n)
+					# todo: sum of column is one
+					row.append(n)
+					col.append(v)
 					val.append(-gamma / len(ns))
 					T1_values.append((1.0 - stay_prob) / len(ns))
 					T2_values.append((1.0 - stay_prob) / len(ns))
