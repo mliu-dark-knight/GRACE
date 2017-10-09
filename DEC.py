@@ -75,7 +75,7 @@ class DEC(object):
 		return hidden
 
 	def decode(self):
-		hidden = self.Z
+		hidden = self.transform()
 		for i, dim in enumerate(self.paras.decoder_hidden):
 			hidden = fully_connected(hidden, dim, 'decoder_' + str(i))
 		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')
