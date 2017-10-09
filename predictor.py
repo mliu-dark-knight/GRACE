@@ -14,7 +14,7 @@ from evaluate import f1_community, jc_community, nmi_community
 class Predictor(object):
 	def __init__(self, paras):
 		self.paras = deepcopy(paras)
-		self.graph = Graph.load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.stay_prob)
+		self.graph = Graph.load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.stay_prob, paras.alpha, paras.beta)
 		self.reset_paras()
 
 	def reset_paras(self):

@@ -13,13 +13,17 @@ class DEC(object):
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
-		self.T1 = tf.SparseTensor(indices=graph.indices, values=graph.T1_values, dense_shape=dense_shape)
+		self.T1 = tf.SparseTensor(indices=graph.T1_indices, values=graph.T1_values, dense_shape=dense_shape)
 		# random walk incoming
-		self.T2 = tf.SparseTensor(indices=graph.indices, values=graph.T2_values, dense_shape=dense_shape)
+		self.T2 = tf.SparseTensor(indices=graph.T2_indices, values=graph.T2_values, dense_shape=dense_shape)
 		# graph Laplacian 1
-		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
+		self.L1 = tf.SparseTensor(indices=graph.L1_indices, values=graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
-		self.L2 = tf.SparseTensor(indices=graph.indices, values=graph.L2_values, dense_shape=dense_shape)
+		self.L2 = tf.SparseTensor(indices=graph.L2_indices, values=graph.L2_values, dense_shape=dense_shape)
+		# influence propagation matrix
+		self.RI = tf.Variable(graph.RI, trainable=False, dtype=tf.float32)
+		# random walk propagation matrix
+		self.RW = None
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
 		self.Z = self.transform(self.encode())
@@ -52,11 +56,15 @@ class DEC(object):
 
 	def transform(self, Z):
 		transition_function = self.paras.transition_function
-		if transition_function == 'T':
+		if transition_function in ['T1', 'T2']:
 			for i in range(self.paras.random_walk_step):
-				Z = tf.sparse_tensor_dense_matmul(self.T, Z)
-		else:
+				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+		elif transition_function in ['RI', 'RW']:
+			Z = tf.matmul(self.RI, Z, transpose_a=True)
+		else:
+			raise ValueError('Invalid transition function')
 		return Z
 
 	def encode(self):
