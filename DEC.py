@@ -20,10 +20,10 @@ class DEC(object):
 		self.L1 = tf.SparseTensor(indices=graph.L1_indices, values=graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
 		self.L2 = tf.SparseTensor(indices=graph.L2_indices, values=graph.L2_values, dense_shape=dense_shape)
-		# influence propagation matrix
-		self.RI = tf.Variable(graph.RI, trainable=False, dtype=tf.float32)
-		# random walk propagation matrix
-		self.RW = None
+		# influence propagation outgoing matrix
+		self.RI1 = tf.Variable(graph.RI1, trainable=False, dtype=tf.float32)
+		# influence propagation incoming matrix
+		self.RI2 = tf.Variable(graph.RI2, trainable=False, dtype=tf.float32)
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
 		self.Z = self.encode()
@@ -62,8 +62,8 @@ class DEC(object):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function in ['RI', 'RW']:
-			Z = tf.matmul(self.RI, self.Z, transpose_a=True)
+		elif transition_function in ['RI1', 'RI2']:
+			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
 		return Z

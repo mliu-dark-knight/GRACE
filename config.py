@@ -8,7 +8,7 @@ def parse_args():
 	parser.add_argument('--embed_dim', default=64, help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', default=[256], help='Encoder hidden layer dimension')
 	parser.add_argument('--decoder_hidden', default=[256], help='Decoder hidden layer dimension')
-	parser.add_argument('--transition_function', default='T1', help='Transition function [T1, T2, L1, L2, RI]')
+	parser.add_argument('--transition_function', default='RI2', help='Transition function [T1, T2, L1, L2, RI1, RI2]')
 	parser.add_argument('--random_walk_step', default=1, help=None)
 	parser.add_argument('--stay_prob', default=0.8, help='Probability of staying at current node')
 	# todo: tune alpha and beta

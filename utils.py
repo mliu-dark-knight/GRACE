@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from scipy.sparse import csc_matrix, csr_matrix
+from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import inv
 
 
@@ -60,8 +60,8 @@ class Graph(object):
 					L1_indices.append(np.array([v, n]))
 					L2_indices.append(np.array([v, n]))
 					# todo: sum of column is one
-					row.append(n)
-					col.append(v)
+					row.append(v)
+					col.append(n)
 					val.append(-gamma / len(ns))
 					T1_values.append((1.0 - stay_prob) / len(ns))
 					T2_values.append((1.0 - stay_prob) / len(ns))
@@ -77,8 +77,8 @@ class Graph(object):
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		inverse = csc_matrix((val, (row, col)), shape=(len(edges), len(edges)))
-		self.RI = inv(inverse).todense()
+		self.RI1 = inv(csc_matrix((val, (row, col)), shape=(len(edges), len(edges)))).todense()
+		self.RI2 = inv(csc_matrix((val, (col, row)), shape=(len(edges), len(edges)))).todense()
 
 	@staticmethod
 	def load_graph(feature_file, graph_file, cluster_file, stay_prob, alpha, beta):
