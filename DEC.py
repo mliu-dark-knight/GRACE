@@ -26,7 +26,8 @@ class DEC(object):
 		self.RW = None
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
-		self.Z = self.transform(self.encode())
+		self.Z = self.encode()
+		self.Z_transform = self.transform()
 		self.Q = self.build_Q()
 
 	def build_loss(self):
@@ -40,7 +41,7 @@ class DEC(object):
 		self.gradient_descent = optimizer.minimize(loss)
 
 	def build_Q(self):
-		Z = self.Z
+		Z = self.Z_transform
 		Z = tf.tile(tf.expand_dims(Z, 1), tf.stack([1, self.paras.num_cluster, 1]))
 		Q = 1.0 / (tf.reduce_sum(tf.squared_difference(Z, self.mean), axis=2) + 1.0)
 		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
@@ -54,15 +55,15 @@ class DEC(object):
 		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
 		return loss_c
 
-	def transform(self, Z):
+	def transform(self):
 		transition_function = self.paras.transition_function
 		if transition_function in ['T1', 'T2']:
 			for i in range(self.paras.random_walk_step):
-				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['L1', 'L2']:
-			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['RI', 'RW']:
-			Z = tf.matmul(self.RI, Z, transpose_a=True)
+			Z = tf.matmul(self.RI, self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
 		return Z

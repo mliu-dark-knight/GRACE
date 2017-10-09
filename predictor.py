@@ -32,7 +32,7 @@ class Predictor(object):
 					sess.run(model.pre_gradient_descent)
 			print('reconstruction loss: %f' % sess.run(model.loss_r))
 
-			Z = sess.run(model.Z)
+			Z = sess.run(model.Z_transform)
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
 			model.init_mean(kmeans.cluster_centers_, sess)
 
