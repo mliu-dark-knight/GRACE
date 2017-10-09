@@ -11,10 +11,16 @@ class DEC(object):
 
 	def build_variable(self, graph):
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
-		self.graph = tf.SparseTensor(indices=graph.indices, values=graph.values, dense_shape=[self.paras.num_node, self.paras.num_node])
+		dense_shape = [self.paras.num_node, self.paras.num_node]
+		# transition matrix
+		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
+		# graph Laplacian 1
+		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
+		# graph Laplacian 2
+		self.L2 = tf.SparseTensor(indices=graph.indices, values=graph.L2_values, dense_shape=dense_shape)
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [self.paras.num_node, self.paras.num_cluster])
-		self.Z = self.random_walk(self.encode())
+		self.Z = self.transform(self.encode())
 		self.Q = self.build_Q()
 
 	def build_loss(self):
@@ -42,9 +48,13 @@ class DEC(object):
 		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
 		return loss_c
 
-	def random_walk(self, Z):
-		for i in range(self.paras.random_walk_step):
-			Z = tf.sparse_tensor_dense_matmul(self.graph, Z)
+	def transform(self, Z):
+		transition_function = self.paras.transition_function
+		if transition_function == 'T':
+			for i in range(self.paras.random_walk_step):
+				Z = tf.sparse_tensor_dense_matmul(self.T, Z)
+		else:
+			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
 		return Z
 
 	def encode(self):
