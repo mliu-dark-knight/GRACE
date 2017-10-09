@@ -46,6 +46,7 @@ class Predictor(object):
 				self.diff.append(np.sum(s_prev != s) / 2.0)
 				s_prev = s
 			P = model.get_P(sess)
+			print('reconstruction loss: %f' % sess.run(model.loss_r))
 			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
