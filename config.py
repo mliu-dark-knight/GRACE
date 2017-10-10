@@ -23,6 +23,7 @@ def parse_args():
 	return parser.parse_args()
 
 args = parse_args()
+'''
 data_dir = 'data/' + args.dataset + '/' if sys.platform == 'darwin' else \
 	'/shared/data/' + getpass.getuser() + '/DEC/' + args.dataset + '/'
 args.model_dir = data_dir + 'model/'
@@ -30,5 +31,15 @@ args.feature_file = data_dir + 'feature.txt'
 args.edge_file = data_dir + 'edge.txt'
 args.cluster_file = data_dir + '/cluster.txt'
 args.model_file = data_dir + '/model.pkl'
+args.plot_file = data_dir + '/plot.png'
+args.predict_file = data_dir + '/prediction.txt'
+'''
+
+data_dir = '../../data/cora/server/'
+args.model_dir = '~/model/'
+args.feature_file = data_dir + 'feature.txt'
+args.edge_file = data_dir + 'edge.txt'
+args.cluster_file = data_dir + '/cluster.txt'
+args.model_file = args.model_dir + 'model.pkl'
 args.plot_file = data_dir + '/plot.png'
 args.predict_file = data_dir + '/prediction.txt'
