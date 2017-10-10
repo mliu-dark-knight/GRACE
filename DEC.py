@@ -10,6 +10,7 @@ class DEC(object):
 		self.build_loss()
 
 	def build_variable(self, graph):
+		self.training = tf.placeholder(tf.bool)
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
@@ -75,23 +76,25 @@ class DEC(object):
 		hidden = self.X
 		for i, dim in enumerate(self.paras.encoder_hidden + [self.paras.embed_dim]):
 			hidden = fully_connected(hidden, dim, 'encoder_' + str(i))
+			hidden = dropout(hidden, self.paras.keep_prob, self.training)
 		return hidden
 
 	def decode(self):
 		hidden = self.Z
 		for i, dim in enumerate(self.paras.decoder_hidden):
 			hidden = fully_connected(hidden, dim, 'decoder_' + str(i))
+			hidden = dropout(hidden, self.paras.keep_prob, self.training)
 		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')
 
 	def get_embedding(self, sess):
-		return sess.run(self.Z)
+		return sess.run(self.Z, feed_dict={self.training: False})
 
 	def init_mean(self, mean, sess):
 		sess.run(self.mean.assign(mean))
 
 	def get_P(self, sess):
 		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
-		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True))
+		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True), feed_dict={self.training: False})
 
 	def predict(self, sess):
-		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0))
+		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0), feed_dict={self.training: False})

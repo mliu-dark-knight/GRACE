@@ -11,7 +11,7 @@ def parse_args():
 	parser.add_argument('--transition_function', default='RI2', help='Transition function [T1, T2, L1, L2, RI1, RI2]')
 	parser.add_argument('--random_walk_step', default=2, help=None)
 	parser.add_argument('--alpha', default=0.1, help='Damping coefficient for propagation process')
-	parser.add_argument('--keep_prob', default=1.0, help='Keep probability of dropout')
+	parser.add_argument('--keep_prob', default=0.8, help='Keep probability of dropout')
 	parser.add_argument('--BN', default=True, help='Apply batch normalization')
 	parser.add_argument('--lambda_r', default=1.0, help='Reconstruct loss coefficient')
 	parser.add_argument('--lambda_c', default=0.2, help='Clustering loss coefficient')

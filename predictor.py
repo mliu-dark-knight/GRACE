@@ -29,10 +29,10 @@ class Predictor(object):
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 				for _ in range(self.paras.pre_step):
-					sess.run(model.pre_gradient_descent)
-			print('reconstruction loss: %f' % sess.run(model.loss_r))
+					sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
+			print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
 
-			Z = sess.run(model.Z_transform)
+			Z = sess.run(model.Z_transform, feed_dict={model.training: False})
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
 			model.init_mean(kmeans.cluster_centers_, sess)
 
@@ -41,13 +41,13 @@ class Predictor(object):
 			for _ in tqdm(range(self.paras.epoch), ncols=100):
 				P = model.get_P(sess)
 				for _ in range(self.paras.step):
-					sess.run(model.gradient_descent, feed_dict={model.P: P})
+					sess.run(model.gradient_descent, feed_dict={model.training: True, model.P: P})
 				s = model.predict(sess)
 				self.diff.append(np.sum(s_prev != s) / 2.0)
 				s_prev = s
 			P = model.get_P(sess)
-			print('reconstruction loss: %f' % sess.run(model.loss_r))
-			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.P: P}))
+			print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
+			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
 			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
