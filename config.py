@@ -12,6 +12,8 @@ def parse_args():
 	parser.add_argument('--transition_function', default='T1', help='Transition function [T1, T2, L1, L2, RI1, RI2]')
 	parser.add_argument('--random_walk_step', default=0, help=None)
 	parser.add_argument('--stay_prob', default=0, help='Probability of staying at current node')
+	parser.add_argument('--keep_prob', default=1.0, help='Keep probability of dropout')
+	parser.add_argument('--BN', default=True, help='Apply batch normalization')
 	# todo: tune alpha and beta
 	parser.add_argument('--alpha', default=1.0, help='Damping coefficient for propagation process')
 	parser.add_argument('--beta', default=0.8, help='Probability of node propagating content to itself')

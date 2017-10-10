@@ -67,6 +67,8 @@ class DEC(object):
 			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
+		if self.paras.BN:
+			Z = batch_normalization(Z, 'Z')
 		return Z
 
 	def encode(self):

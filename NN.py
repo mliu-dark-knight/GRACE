@@ -1,5 +1,4 @@
 import math
-
 import tensorflow as tf
 
 
@@ -17,3 +16,16 @@ def fully_connected(input, num_neurons, name, activation='elu'):
 	W = weight(name + '_W', [input.get_shape().as_list()[1], num_neurons], init='he')
 	l = tf.matmul(input, W) + bias(name + '_b', num_neurons)
 	return func[activation](l)
+
+def dropout(x, keep_prob, training):
+	return tf.cond(training, lambda: tf.nn.dropout(x, keep_prob), x)
+
+# assumes 2d input, first dimension if batch size
+def batch_normalization(x, name):
+	with tf.variable_scope('BN'):
+		shape = x.get_shape()
+		beta = tf.get_variable(name + '_beta', shape[-1], initializer=tf.constant_initializer(0.))
+		gamma = tf.get_variable(name + '_gamma', shape[-1], initializer=tf.constant_initializer(1.))
+		mean, variance = tf.nn.moments(x, [0])
+		normed = tf.nn.batch_normalization(x, mean, variance, beta, gamma, 1e-3)
+	return normed
