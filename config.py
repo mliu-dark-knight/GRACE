@@ -18,6 +18,7 @@ def parse_args():
 	parser.add_argument('--pre_step', default=20, help=None)
 	parser.add_argument('--epoch', default=10, help=None)
 	parser.add_argument('--step', default=10, help=None)
+	parser.add_argument('--epsilon', default=1.0, help='Annealing hyperparameter for cluster assignment')
 	parser.add_argument('--dataset', default='cora', help=None)
 	return parser.parse_args()
 
