@@ -5,7 +5,7 @@ import sys
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--feat_dim', type=int, default=-1, help='Feature dimension')
-	parser.add_argument('--embed_dim', type-int, default=1024, help='Embedding dimension')
+	parser.add_argument('--embed_dim', type=int, default=1024, help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[], help='Encoder hidden layer dimension')
 	parser.add_argument('--decoder_hidden', type=list, default=[], help='Decoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=str, default='RI2', help='Transition function [T1, T2, L1, L2, RI1, RI2]')
