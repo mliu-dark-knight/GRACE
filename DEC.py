@@ -57,6 +57,7 @@ class DEC(object):
 
 	def transform(self):
 		transition_function = self.paras.transition_function
+		Z = self.Z
 		if transition_function in ['T1', 'T2']:
 			for i in range(self.paras.random_walk_step):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
@@ -75,7 +76,7 @@ class DEC(object):
 		return hidden
 
 	def decode(self):
-		hidden = self.transform()
+		hidden = self.Z
 		for i, dim in enumerate(self.paras.decoder_hidden):
 			hidden = fully_connected(hidden, dim, 'decoder_' + str(i))
 		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')

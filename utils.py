@@ -8,10 +8,10 @@ from scipy.sparse.linalg import inv
 
 
 class Graph(object):
-	def __init__(self, feature_file, edge_file, cluster_file, stay_prob, alpha, beta):
-		self.init(feature_file, edge_file, cluster_file, stay_prob, alpha, beta)
+	def __init__(self, feature_file, edge_file, cluster_file, alpha):
+		self.init(feature_file, edge_file, cluster_file, alpha)
 
-	def init(self, feature_file, edge_file, cluster_file, stay_prob, alpha, beta):
+	def init(self, feature_file, edge_file, cluster_file, alpha):
 		feature = []
 		with open(feature_file) as f:
 			for line in f:
@@ -40,7 +40,7 @@ class Graph(object):
 		L1_indices, L1_values = [], []
 		L2_indices, L2_values = [], []
 		row, col, val = [], [], []
-		gamma = alpha / beta
+
 		for v, ns in edges.items():
 			T1_indices.append(np.array([v, v]))
 			T2_indices.append(np.array([v, v]))
@@ -48,9 +48,9 @@ class Graph(object):
 			L2_indices.append(np.array([v, v]))
 			row.append(v)
 			col.append(v)
-			val.append(1.0 - gamma / len(ns))
-			T1_values.append(stay_prob + 1.0 / len(ns))
-			T2_values.append(stay_prob + 1.0 / len(ns))
+			val.append(1.0 - alpha / len(ns))
+			T1_values.append(1.0 / len(ns))
+			T2_values.append(1.0 / len(ns))
 			L1_values.append(1.0)
 			L2_values.append(1.0)
 			for n in ns:
@@ -62,9 +62,9 @@ class Graph(object):
 					# todo: sum of column is one
 					row.append(v)
 					col.append(n)
-					val.append(-gamma / len(ns))
-					T1_values.append((1.0 - stay_prob) / len(ns))
-					T2_values.append((1.0 - stay_prob) / len(ns))
+					val.append(-alpha / len(ns))
+					T1_values.append(1.0 / len(ns))
+					T2_values.append(1.0 / len(ns))
 					L1_values.append(1.0 - 1.0 / len(ns))
 					L2_values.append(1.0 + 1.0 / len(ns))
 
@@ -79,10 +79,14 @@ class Graph(object):
 
 		self.RI1 = inv(csc_matrix((val, (row, col)), shape=(len(edges), len(edges)))).todense()
 		self.RI2 = inv(csc_matrix((val, (col, row)), shape=(len(edges), len(edges)))).todense()
-
+		with open('/home/jiyang3/RI.txt', 'w') as f:
+			for i in range(self.RI1.shape[0]):
+				for j in range(self.RI1.shape[1]):
+					f.write(str(self.RI1[i,j])+' ')
+				f.write('\n')
 	@staticmethod
-	def load_graph(feature_file, graph_file, cluster_file, stay_prob, alpha, beta):
-		return Graph(feature_file, graph_file, cluster_file, stay_prob, alpha, beta)
+	def load_graph(feature_file, graph_file, cluster_file, alpha):
+		return Graph(feature_file, graph_file, cluster_file, alpha)
 
 
 def scatter(data, cluster, plot_file):
