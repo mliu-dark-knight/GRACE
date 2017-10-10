@@ -64,7 +64,7 @@ class DEC(object):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function in ['RI1', 'RI2']:
+		elif transition_function in ['RI1', 'RI2', 'RI3']:
 			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')

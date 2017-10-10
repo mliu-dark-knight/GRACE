@@ -3,3 +3,4 @@
 .idea/
 data/cora/
 *pyc
+.DS_Store

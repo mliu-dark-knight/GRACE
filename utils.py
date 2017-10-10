@@ -62,22 +62,22 @@ class Graph(object):
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		self.RI1 = inv(csc_matrix((RI1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
+		self.RI1 = inv(csc_matrix((RI1_values, (self.indices[:,0], self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
 		self.RI2 = inv(csc_matrix((RI2_values, (self.indices[:,0], self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
 
 		#self.T1 = csc_matrix((self.T1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
 		#self.T2 = csc_matrix((self.T2_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
-		#self.RI1 = np.genfromtxt('r5.csv', delimiter=',')
+		self.RI3 = np.genfromtxt('/Users/ji.yang/Documents/RI/r.csv', delimiter=',')
 		#self.RI1 = np.transpose(self.RI1)
 		
 		#print(np.sum(self.RI1, axis=0))
 		#print(np.sum(self.RI1, axis=1))
 		
 		#with open('RI1.pkl', 'wb') as f:
-		#	pickle.dump(np.transpose(self.RI1), f)
+			#pickle.dump(self.RI1, f)
 		#with open('RI2.pkl', 'wb') as f:
-		#	pickle.dump(np.transpose(self.RI2), f)
-		
+			#pickle.dump(self.RI2, f)
+
 	@staticmethod
 	def load_graph(feature_file, graph_file, cluster_file, alpha):
 		return Graph(feature_file, graph_file, cluster_file, alpha)

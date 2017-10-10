@@ -30,6 +30,7 @@ class CPIP(object):
 		self.RI1 = tf.Variable(self.graph.RI1, trainable=False, dtype=tf.float32)
 		# influence propagation incoming matrix
 		self.RI2 = tf.Variable(self.graph.RI2, trainable=False, dtype=tf.float32)
+		self.RI3 = tf.Variable(self.graph.RI3, trainable=False, dtype=tf.float32)
 
 	def reset_paras(self):
 		self.paras.feat_dim = len(self.graph.feature[0])
@@ -60,7 +61,7 @@ class CPIP(object):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
-		elif transition_function in ['RI1', 'RI2']:
+		elif transition_function in ['RI1', 'RI2', 'RI3']:
 			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
