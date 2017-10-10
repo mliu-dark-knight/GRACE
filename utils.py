@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import inv
-
+import pickle
 
 class Graph(object):
-	def __init__(self, feature_file, edge_file, cluster_file, stay_prob, alpha, beta):
-		self.init(feature_file, edge_file, cluster_file, stay_prob, alpha, beta)
+	def __init__(self, feature_file, edge_file, cluster_file, alpha):
+		self.init(feature_file, edge_file, cluster_file, alpha)
 
-	def init(self, feature_file, edge_file, cluster_file, stay_prob, alpha, beta):
+	def init(self, feature_file, edge_file, cluster_file, alpha):
 		feature = []
 		with open(feature_file) as f:
 			for line in f:
@@ -35,54 +35,52 @@ class Graph(object):
 			assert v not in ns
 			edges[v].add(v)
 
-		T1_indices, T1_values = [], []
-		T2_indices, T2_values = [], []
-		L1_indices, L1_values = [], []
-		L2_indices, L2_values = [], []
-		row, col, val = [], [], []
-		gamma = alpha / beta
+		indices = []
+		T1_values, T2_values, L1_values, L2_values, RI1_values, RI2_values = [], [], [], [], [], []
+
 		for v, ns in edges.items():
-			T1_indices.append(np.array([v, v]))
-			T2_indices.append(np.array([v, v]))
-			L1_indices.append(np.array([v, v]))
-			L2_indices.append(np.array([v, v]))
-			row.append(v)
-			col.append(v)
-			val.append(1.0 - gamma / len(ns))
-			T1_values.append(stay_prob + 1.0 / len(ns))
-			T2_values.append(stay_prob + 1.0 / len(ns))
-			L1_values.append(1.0)
-			L2_values.append(1.0)
+			indices.append(np.array([v, v]))
+			T1_values.append(1.0 / len(ns))
+			T2_values.append(1.0 / len(ns))
+			L1_values.append(1.0 - 1.0 / len(ns))
+			L2_values.append(1.0 + 1.0 / len(ns))
+			RI1_values.append(1.0 - alpha / len(ns))
+			RI2_values.append(1.0 - alpha / len(ns))
 			for n in ns:
 				if v != n:
-					T1_indices.append(np.array([v, n]))
-					T2_indices.append(np.array([n, v]))
-					L1_indices.append(np.array([v, n]))
-					L2_indices.append(np.array([v, n]))
-					# todo: sum of column is one
-					row.append(v)
-					col.append(n)
-					val.append(-gamma / len(ns))
-					T1_values.append((1.0 - stay_prob) / len(ns))
-					T2_values.append((1.0 - stay_prob) / len(ns))
-					L1_values.append(1.0 - 1.0 / len(ns))
-					L2_values.append(1.0 + 1.0 / len(ns))
+					indices.append(np.array([v, n]))
+					T1_values.append(1.0 / len(ns))
+					T2_values.append(1.0 / len(edges[n]))
+					L1_values.append(-1.0 / (np.sqrt(len(ns))*np.sqrt(len(edges[n]))))
+					L2_values.append(1.0 / (np.sqrt(len(ns))*np.sqrt(len(edges[n]))))
+					RI1_values.append(-alpha / len(ns))
+					RI2_values.append(-alpha / len(edges[n]))
 
-		self.T1_indices = np.array(T1_indices)
-		self.T2_indices = np.array(T2_indices)
-		self.L1_indices = np.array(L1_indices)
-		self.L2_indices = np.array(L2_indices)
+		self.indices = np.array(indices)
 		self.T1_values = np.asarray(T1_values, dtype=np.float32)
 		self.T2_values = np.asarray(T2_values, dtype=np.float32)
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		self.RI1 = inv(csc_matrix((val, (row, col)), shape=(len(edges), len(edges)))).todense()
-		self.RI2 = inv(csc_matrix((val, (col, row)), shape=(len(edges), len(edges)))).todense()
+		self.RI1 = inv(csc_matrix((RI1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
+		self.RI2 = inv(csc_matrix((RI2_values, (self.indices[:,0], self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
 
+		#self.T1 = csc_matrix((self.T1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
+		#self.T2 = csc_matrix((self.T2_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
+		#self.RI1 = np.genfromtxt('r5.csv', delimiter=',')
+		#self.RI1 = np.transpose(self.RI1)
+		
+		#print(np.sum(self.RI1, axis=0))
+		#print(np.sum(self.RI1, axis=1))
+		
+		#with open('RI1.pkl', 'wb') as f:
+		#	pickle.dump(np.transpose(self.RI1), f)
+		#with open('RI2.pkl', 'wb') as f:
+		#	pickle.dump(np.transpose(self.RI2), f)
+		
 	@staticmethod
-	def load_graph(feature_file, graph_file, cluster_file, stay_prob, alpha, beta):
-		return Graph(feature_file, graph_file, cluster_file, stay_prob, alpha, beta)
+	def load_graph(feature_file, graph_file, cluster_file, alpha):
+		return Graph(feature_file, graph_file, cluster_file, alpha)
 
 
 def scatter(data, cluster, plot_file):

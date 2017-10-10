@@ -13,13 +13,13 @@ class DEC(object):
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
-		self.T1 = tf.SparseTensor(indices=graph.T1_indices, values=graph.T1_values, dense_shape=dense_shape)
+		self.T1 = tf.SparseTensor(indices=graph.indices, values=graph.T1_values, dense_shape=dense_shape)
 		# random walk incoming
-		self.T2 = tf.SparseTensor(indices=graph.T2_indices, values=graph.T2_values, dense_shape=dense_shape)
+		self.T2 = tf.SparseTensor(indices=graph.indices, values=graph.T2_values, dense_shape=dense_shape)
 		# graph Laplacian 1
-		self.L1 = tf.SparseTensor(indices=graph.L1_indices, values=graph.L1_values, dense_shape=dense_shape)
+		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
-		self.L2 = tf.SparseTensor(indices=graph.L2_indices, values=graph.L2_values, dense_shape=dense_shape)
+		self.L2 = tf.SparseTensor(indices=graph.indices, values=graph.L2_values, dense_shape=dense_shape)
 		# influence propagation outgoing matrix
 		self.RI1 = tf.Variable(graph.RI1, trainable=False, dtype=tf.float32)
 		# influence propagation incoming matrix
@@ -78,7 +78,7 @@ class DEC(object):
 		return hidden
 
 	def decode(self):
-		hidden = self.Z_transform
+		hidden = self.Z
 		for i, dim in enumerate(self.paras.decoder_hidden):
 			hidden = fully_connected(hidden, dim, 'decoder_' + str(i))
 		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')
