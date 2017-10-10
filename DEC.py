@@ -43,7 +43,7 @@ class DEC(object):
 	def build_Q(self):
 		Z = self.Z_transform
 		Z = tf.tile(tf.expand_dims(Z, 1), tf.stack([1, self.paras.num_cluster, 1]))
-		Q = 1.0 / (tf.reduce_sum(tf.squared_difference(Z, self.mean), axis=2) + 1.0)
+		Q = tf.pow(tf.reduce_sum(tf.squared_difference(Z, self.mean), axis=2) / self.paras.epsilon + 1.0, -(self.paras.epsilon + 1.0) / 2.0)
 		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
 
 	def loss_r(self, X_p):
