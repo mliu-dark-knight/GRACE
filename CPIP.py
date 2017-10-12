@@ -14,22 +14,18 @@ from utils import *
 class CPIP(object):
 	def __init__(self, paras):
 		self.paras = deepcopy(paras)
-		self.graph = Graph.load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha)
+		self.graph = Graph.load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha, paras.lambda_)
 		self.reset_paras()
 
 		dense_shape = [self.paras.num_node, self.paras.num_node]
-		# random walk outgoing
-		self.T1 = tf.SparseTensor(indices=self.graph.indices, values=self.graph.T1_values, dense_shape=dense_shape)
-		# random walk incoming
-		self.T2 = tf.SparseTensor(indices=self.graph.indices, values=self.graph.T2_values, dense_shape=dense_shape)
+		# random walk
+		self.T = tf.SparseTensor(indices=self.graph.indices, values=self.graph.T_values, dense_shape=dense_shape)
 		# graph Laplacian 1
 		self.L1 = tf.SparseTensor(indices=self.graph.indices, values=self.graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
 		self.L2 = tf.SparseTensor(indices=self.graph.indices, values=self.graph.L2_values, dense_shape=dense_shape)
-		# influence propagation outgoing matrix
-		self.RI1 = tf.Variable(self.graph.RI1, trainable=False, dtype=tf.float32)
-		# influence propagation incoming matrix
-		self.RI2 = tf.Variable(self.graph.RI2, trainable=False, dtype=tf.float32)
+		# influence propagation matrix
+		self.RI = tf.Variable(self.graph.RI, trainable=False, dtype=tf.float32)
 
 	def reset_paras(self):
 		self.paras.feat_dim = len(self.graph.feature[0])
@@ -55,13 +51,13 @@ class CPIP(object):
 	def transform(self, X):
 		transition_function = self.paras.transition_function
 		Z = X
-		if transition_function in ['T1', 'T2']:
+		if transition_function == 'T':
 			for i in range(self.paras.random_walk_step):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
-		elif transition_function in ['RI1', 'RI2']:
-			Z = tf.matmul(self.__getattribute__(transition_function), Z)
+		elif transition_function == 'RI':
+			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
 		return Z

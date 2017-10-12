@@ -37,12 +37,11 @@ class Graph(object):
 			edges[v].add(v)
 
 		indices = []
-		T1_values, T2_values, L1_values, L2_values, RI_values, RW_values = [], [], [], [], [], []
+		T_values, L1_values, L2_values, RI_values, RW_values = [], [], [], [], []
 
 		for v, ns in edges.items():
 			indices.append(np.array([v, v]))
-			T1_values.append(1.0 / len(ns))
-			T2_values.append(1.0 / len(ns))
+			T_values.append(1.0 / len(ns))
 			L1_values.append(1.0 - 1.0 / len(ns))
 			L2_values.append(1.0 + 1.0 / len(ns))
 			RI_values.append(1.0 - alpha / len(ns))
@@ -50,20 +49,18 @@ class Graph(object):
 			for n in ns:
 				if v != n:
 					indices.append(np.array([v, n]))
-					T1_values.append(1.0 / len(ns))
-					T2_values.append(1.0 / len(edges[n]))
+					T_values.append(1.0 / len(ns))
 					L1_values.append(-1.0 / (np.sqrt(len(ns)) * np.sqrt(len(edges[n]))))
 					L2_values.append(1.0 / (np.sqrt(len(ns)) * np.sqrt(len(edges[n]))))
 					RI_values.append(-alpha / len(ns))
 					RW_values.append(-(1.0 - lambda_) / len(ns))
 
 		self.indices = np.array(indices)
-		self.T1_values = np.asarray(T1_values, dtype=np.float32)
-		self.T2_values = np.asarray(T2_values, dtype=np.float32)
+		self.T_values = np.asarray(T_values, dtype=np.float32)
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
+		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 1], self.indices[:, 0])), shape=(len(edges), len(edges)))).todense()
 		self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
 		self.RW /= np.sum(self.RW, axis=0)
 

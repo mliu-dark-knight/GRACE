@@ -14,9 +14,7 @@ class GRACE(object):
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
-		self.T1 = tf.SparseTensor(indices=graph.indices, values=graph.T1_values, dense_shape=dense_shape)
-		# random walk incoming
-		self.T2 = tf.SparseTensor(indices=graph.indices, values=graph.T2_values, dense_shape=dense_shape)
+		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
 		# graph Laplacian 1
 		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
 		# graph Laplacian 2
@@ -65,14 +63,12 @@ class GRACE(object):
 	def transform(self):
 		transition_function = self.paras.transition_function
 		Z = self.Z
-		if transition_function in ['T1', 'T2']:
+		if transition_function == 'T':
 			for i in range(self.paras.random_walk_step):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function == 'RI':
-			Z = tf.matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function == 'RW':
+		elif transition_function in ['RI', 'RW']:
 			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')

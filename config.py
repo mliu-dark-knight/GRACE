@@ -9,7 +9,7 @@ def parse_args():
 	parser.add_argument('--embed_dim', type=int, default=256, help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[1024, 512], help='Encoder hidden layer dimension')
 	parser.add_argument('--decoder_hidden', type=list, default=[512, 1024], help='Decoder hidden layer dimension')
-	parser.add_argument('--transition_function', type=str, default='RW', help='Transition function [T1, T2, L1, L2, RI, RW]')
+	parser.add_argument('--transition_function', type=str, default='RI', help='Transition function [T, L1, L2, RI, RW]')
 	parser.add_argument('--random_walk_step', type=int, default=2, help=None)
 	parser.add_argument('--alpha', type=float, default=0.9, help='Damping coefficient for propagation process')
 	parser.add_argument('--lambda_', type=float, default=0.1)
