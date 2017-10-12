@@ -1,15 +1,15 @@
 from __future__ import print_function
-import pickle
-import tensorflow as tf
+
 from copy import deepcopy
-from tqdm import tqdm
+
+import tensorflow as tf
 from sklearn.cluster import KMeans
-from sklearn.manifold import TSNE
 from sklearn.preprocessing import MultiLabelBinarizer
-from utils import *
-from GRACE import DEC
-from evaluate import f1_community, jc_community, nmi_community
+
 from config import args
+from evaluate import f1_community, jc_community, nmi_community
+from utils import *
+
 
 class CPIP(object):
 	def __init__(self, paras):
