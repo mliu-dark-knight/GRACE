@@ -9,10 +9,10 @@ from scipy.sparse.linalg import inv
 
 
 class Graph(object):
-	def __init__(self, feature_file, edge_file, cluster_file, alpha):
-		self.init(feature_file, edge_file, cluster_file, alpha)
+	def __init__(self, feature_file, edge_file, cluster_file, alpha, lambda_):
+		self.init(feature_file, edge_file, cluster_file, alpha, lambda_)
 
-	def init(self, feature_file, edge_file, cluster_file, alpha):
+	def init(self, feature_file, edge_file, cluster_file, alpha, lambda_):
 		feature = []
 		with open(feature_file) as f:
 			for line in f:
@@ -37,7 +37,7 @@ class Graph(object):
 			edges[v].add(v)
 
 		indices = []
-		T1_values, T2_values, L1_values, L2_values, RI1_values, RI2_values = [], [], [], [], [], []
+		T1_values, T2_values, L1_values, L2_values, RI_values, RW_values = [], [], [], [], [], []
 
 		for v, ns in edges.items():
 			indices.append(np.array([v, v]))
@@ -45,8 +45,8 @@ class Graph(object):
 			T2_values.append(1.0 / len(ns))
 			L1_values.append(1.0 - 1.0 / len(ns))
 			L2_values.append(1.0 + 1.0 / len(ns))
-			RI1_values.append(1.0 - alpha / len(ns))
-			RI2_values.append(1.0 - alpha / len(ns))
+			RI_values.append(1.0 - alpha / len(ns))
+			RW_values.append(1.0 - (1.0 - lambda_) / len(ns))
 			for n in ns:
 				if v != n:
 					indices.append(np.array([v, n]))
@@ -54,8 +54,8 @@ class Graph(object):
 					T2_values.append(1.0 / len(edges[n]))
 					L1_values.append(-1.0 / (np.sqrt(len(ns)) * np.sqrt(len(edges[n]))))
 					L2_values.append(1.0 / (np.sqrt(len(ns)) * np.sqrt(len(edges[n]))))
-					RI1_values.append(-alpha / len(ns))
-					RI2_values.append(-alpha / len(edges[n]))
+					RI_values.append(-alpha / len(ns))
+					RW_values.append(-(1.0 - lambda_) / len(ns))
 
 		self.indices = np.array(indices)
 		self.T1_values = np.asarray(T1_values, dtype=np.float32)
@@ -63,25 +63,13 @@ class Graph(object):
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		self.RI1 = inv(csc_matrix((RI1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
-		self.RI2 = inv(csc_matrix((RI2_values, (self.indices[:,0], self.indices[:,1])), shape=(len(edges), len(edges)))).todense()
+		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
+		self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
+		self.RW /= np.sum(self.RW, axis=0)
 
-		#self.T1 = csc_matrix((self.T1_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
-		#self.T2 = csc_matrix((self.T2_values, (self.indices[:,0],self.indices[:,1])), shape=(len(edges), len(edges))).todense()
-		#self.RI1 = np.genfromtxt('r5.csv', delimiter=',')
-		#self.RI1 = np.transpose(self.RI1)
-		
-		#print(np.sum(self.RI1, axis=0))
-		#print(np.sum(self.RI1, axis=1))
-		
-		#with open('RI1.pkl', 'wb') as f:
-		#	pickle.dump(np.transpose(self.RI1), f)
-		#with open('RI2.pkl', 'wb') as f:
-		#	pickle.dump(np.transpose(self.RI2), f)
-		
 	@staticmethod
-	def load_graph(feature_file, graph_file, cluster_file, alpha):
-		return Graph(feature_file, graph_file, cluster_file, alpha)
+	def load_graph(feature_file, graph_file, cluster_file, alpha, lambda_):
+		return Graph(feature_file, graph_file, cluster_file, alpha, lambda_)
 
 
 def scatter(data, cluster, plot_file):
