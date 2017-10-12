@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import MultiLabelBinarizer
 from utils import *
-from DEC import DEC
+from GRACE import DEC
 from evaluate import f1_community, jc_community, nmi_community
 from config import args
 

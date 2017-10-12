@@ -1,6 +1,6 @@
 from NN import *
 
-class DEC(object):
+class GRACE(object):
 	def __init__(self, paras, graph):
 		self.paras = paras
 		self.build(graph)

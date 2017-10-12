@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import MultiLabelBinarizer
 from utils import *
-from DEC import DEC
+from GRACE import GRACE
 from evaluate import f1_community, jc_community, nmi_community
 
 
@@ -23,7 +23,7 @@ class Predictor(object):
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
 	def train(self):
-		model = DEC(self.paras, self.graph)
+		model = GRACE(self.paras, self.graph)
 		with tf.Session() as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
