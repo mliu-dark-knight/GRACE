@@ -31,11 +31,11 @@ class GRACE(object):
 
 	def build_loss(self):
 		X_p = self.decode()
-		self.loss_r, self.loss_c, self.loss_2 = self.build_loss_r(X_p), self.build_loss_c(), self.build_loss_2()
+		self.loss_r, self.loss_c = self.build_loss_r(X_p), self.build_loss_c()
 		pre_loss = self.loss_r
 		pre_optimizer = getattr(tf.train, self.paras.optimizer + 'Optimizer')(learning_rate=self.paras.learning_rate)
 		self.pre_gradient_descent = pre_optimizer.minimize(pre_loss)
-		loss = self.paras.lambda_r * self.loss_r + self.paras.lambda_c * self.loss_c + self.paras.lambda_2 * self.loss_2
+		loss = self.paras.lambda_r * self.loss_r + self.paras.lambda_c * self.loss_c
 		optimizer = getattr(tf.train, self.paras.optimizer + 'Optimizer')(learning_rate=self.paras.learning_rate)
 		self.gradient_descent = optimizer.minimize(loss)
 
