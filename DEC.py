@@ -33,11 +33,11 @@ class DEC(object):
 
 	def build_loss(self):
 		X_p = self.decode()
-		self.loss_r, self.loss_c = self.loss_r(X_p), self.loss_c()
+		self.loss_r, self.loss_c, self.loss_2 = self.build_loss_r(X_p), self.build_loss_c(), self.build_loss_2()
 		pre_loss = self.loss_r
 		pre_optimizer = tf.train.AdamOptimizer(learning_rate=self.paras.learning_rate)
 		self.pre_gradient_descent = pre_optimizer.minimize(pre_loss)
-		loss = self.paras.lambda_r * self.loss_r + self.paras.lambda_c * self.loss_c
+		loss = self.paras.lambda_r * self.loss_r + self.paras.lambda_c * self.loss_c + self.paras.lambda_2 * self.loss_2
 		optimizer = tf.train.AdamOptimizer(learning_rate=self.paras.learning_rate)
 		self.gradient_descent = optimizer.minimize(loss)
 
@@ -47,14 +47,20 @@ class DEC(object):
 		Q = tf.pow(tf.reduce_sum(tf.squared_difference(Z, self.mean), axis=2) / self.paras.epsilon + 1.0, -(self.paras.epsilon + 1.0) / 2.0)
 		return Q / tf.reduce_sum(Q, axis=1, keep_dims=True)
 
-	def loss_r(self, X_p):
+	def build_loss_r(self, X_p):
 		# todo: check this
 		return tf.reduce_mean(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.X, logits=X_p), axis=1))
 
-	def loss_c(self):
+	def build_loss_c(self):
 		loss_c = tf.reduce_mean(self.P * tf.log(self.P / self.Q))
 		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
 		return loss_c
+
+	def build_loss_2(self):
+		mean = tf.matmul(self.Q, self.Z_transform, transpose_a=True)
+		norm = tf.transpose(tf.reduce_sum(self.Q, axis=0, keep_dims=True))
+		mean = mean / norm
+		return tf.reduce_mean(tf.reduce_sum(tf.squared_difference(self.mean, mean), axis=1))
 
 	def transform(self):
 		transition_function = self.paras.transition_function
