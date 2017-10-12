@@ -60,7 +60,7 @@ class Graph(object):
 		self.L1_values = np.asarray(L1_values, dtype=np.float32)
 		self.L2_values = np.asarray(L2_values, dtype=np.float32)
 
-		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 1], self.indices[:, 0])), shape=(len(edges), len(edges)))).todense()
+		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
 		self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
 		self.RW /= np.sum(self.RW, axis=0)
 
