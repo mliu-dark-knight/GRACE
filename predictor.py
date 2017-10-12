@@ -48,7 +48,7 @@ class Predictor(object):
 			P = model.get_P(sess)
 			print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
 			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
-			# print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
+			print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
 			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)

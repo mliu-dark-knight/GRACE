@@ -68,9 +68,7 @@ class GRACE(object):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function == 'RI':
-			Z = tf.matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function == 'RW':
+		elif transition_function in ['RI', 'RW']:
 			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')

@@ -57,7 +57,7 @@ class CPIP(object):
 		elif transition_function in ['L1', 'L2']:
 			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
 		elif transition_function == 'RI':
-			Z = tf.matmul(self.__getattribute__(transition_function), Z)
+			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
 		return Z
