@@ -25,7 +25,7 @@ class Predictor(object):
 	def train(self):
 		tf.reset_default_graph()
 		model = GRACE(self.paras, self.graph)
-		with tf.Session() as sess:
+		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
