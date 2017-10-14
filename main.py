@@ -8,5 +8,8 @@ if __name__ == '__main__':
 	predictor = Predictor(args)
 	predictor.train()
 	# predictor.plot()
-	predictor.evaluate()
+	f1, jc, nmi = predictor.evaluate()
+	print 'f1 score %f' % f1
+	print 'jc score %f' % jc
+	print 'nmi score %f' % nmi
 	# predictor.dump()

@@ -34,7 +34,7 @@ class Predictor(object):
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 				for _ in range(self.paras.pre_step):
 					sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
-			print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
+			# print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
 
 			Z = sess.run(model.Z_transform, feed_dict={model.training: False})
 			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
@@ -50,9 +50,9 @@ class Predictor(object):
 				self.diff.append(np.sum(s_prev != s) / 2.0)
 				s_prev = s
 			P = model.get_P(sess)
-			print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
-			print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
-			print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
+			# print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
+			# print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
+			# print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
 			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
@@ -64,9 +64,7 @@ class Predictor(object):
 
 	def evaluate(self):
 		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
-		print('f1 score %f' % f1_community(prediction, ground_truth))
-		print('jc score %f' % jc_community(prediction, ground_truth))
-		print('nmi score %f' % nmi_community(prediction, ground_truth))
+		return f1_community(prediction, ground_truth), jc_community(prediction, ground_truth), nmi_community(prediction, ground_truth)
 
 	def dump(self):
 		# pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
