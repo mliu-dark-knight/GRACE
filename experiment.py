@@ -12,6 +12,8 @@ def parse_args():
 
 def run(num_exp, arg=None, val=None):
 	num_device = sum(1 for device in device_lib.list_local_devices() if device.device_type == 'GPU')
+	print num_device
+	print
 	f1, jc, nmi = [], [], []
 	processes = []
 	batch_processes = []
@@ -30,7 +32,7 @@ def run(num_exp, arg=None, val=None):
 			for process in batch_processes:
 				assert process.poll() is None
 			batch_processes = []
-			for j in range(10):
+			for j in range(20):
 				print
 	for process in processes:
 		process.wait()
