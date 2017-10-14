@@ -10,8 +10,8 @@ from multiprocessing import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--num_exp', type=int, default=3, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=0, help='Number of GPU, change to 0 if not using CPU')
+	parser.add_argument('--num_exp', type=int, default=10, help='Number of experiment')
+	parser.add_argument('--num_device', type=int, default=4, help='Number of GPU, change to 0 if not using CPU')
 	return parser.parse_args()
 
 
