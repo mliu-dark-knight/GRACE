@@ -28,10 +28,7 @@ class Predictor(object):
 				model = GRACE(self.paras, self.graph)
 		else:
 			model = GRACE(self.paras, self.graph)
-		with tf.Session(config=
-		                tf.ConfigProto(allow_soft_placement=True,
-		                               gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.5,
-		                                                         allow_growth=True))) as sess:
+		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
