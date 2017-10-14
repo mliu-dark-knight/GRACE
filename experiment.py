@@ -23,7 +23,7 @@ def run(num_exp, arg=None, val=None):
 		if arg:
 			process = Popen('python2 main.py --%s %s --device %d' % (arg, val, device_id), shell=True, stdout=PIPE)
 		else:
-			process = Popen('python2 main.py --device %d' % (device_id), shell=True, stdout=PIPE)
+			process = Popen('python2 main.py --device %d' % device_id, shell=True, stdout=PIPE)
 		processes.append(process)
 		if num_device != 0:
 			batch_processes.append(process)
