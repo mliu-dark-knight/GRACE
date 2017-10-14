@@ -24,7 +24,7 @@ class Predictor(object):
 
 	def train(self):
 		if self.paras.device != -1:
-			with tf.device('/gpu:' + self.paras.device):
+			with tf.device('/gpu:' + str(self.paras.device)):
 				model = GRACE(self.paras, self.graph)
 		else:
 			model = GRACE(self.paras, self.graph)
