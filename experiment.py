@@ -18,6 +18,7 @@ def run(num_exp, arg=None, val=None):
 	processes = []
 	batch_processes = []
 	for i in range(num_exp):
+		print 'process %d' % i
 		device_id = -1 if args.num_device == 0 else i % args.num_device
 		if arg:
 			process = Popen('python2 main.py --%s %s --device %d' % (arg, val, device_id), shell=True, stdout=PIPE)
