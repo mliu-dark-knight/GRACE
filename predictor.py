@@ -1,5 +1,6 @@
 from __future__ import print_function
 import pickle
+import os
 import tensorflow as tf
 from copy import deepcopy
 from tqdm import tqdm
@@ -24,6 +25,7 @@ class Predictor(object):
 
 	def train(self):
 		with tf.device('/gpu:' + str(self.paras.device)):
+			os.environ['CUDA_VISIBLE_DEVICES'] = str(self.paras.device)
 			model = GRACE(self.paras, self.graph)
 		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
