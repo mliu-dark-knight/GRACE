@@ -26,6 +26,8 @@ def run(num_exp, arg=None, val=None):
 		if num_device != 0:
 			batch_processes.append(process)
 		if num_device != 0 and len(batch_processes) == num_device:
+			for j in range(20):
+				print
 			for process in batch_processes:
 				process.wait()
 			for process in batch_processes:
