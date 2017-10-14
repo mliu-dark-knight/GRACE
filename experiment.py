@@ -1,22 +1,25 @@
 import numpy as np
 import argparse
 from subprocess import *
+from tensorflow.python.client import device_lib
 
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--num_exp', type=int, default=3, help='Number of experiment')
+	parser.add_argument('--num_exp', type=int, default=10, help='Number of experiment')
 	return parser.parse_args()
 
 
 def run(num_exp, arg=None, val=None):
+	num_device = sum(1 for device in device_lib.list_local_devices() if device.device_type == 'GPU')
 	f1, jc, nmi = [], [], []
 	processes = []
 	for i in range(num_exp):
+		device_id = -1 if num_device == 0 else i % num_device
 		if arg:
-			process = Popen('python2 main.py --%s %s' % (arg, val))
+			process = Popen('python2 main.py --%s %s --device %d' % (arg, val, device_id), shell=True, stdout=PIPE)
 		else:
-			process = Popen('python2 main.py', shell=True, stdout=PIPE)
+			process = Popen('python2 main.py --device %d' % (device_id), shell=True, stdout=PIPE)
 		processes.append(process)
 	for process in processes:
 		process.wait()

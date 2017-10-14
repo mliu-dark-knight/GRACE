@@ -4,7 +4,7 @@ import sys
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-
+	parser.add_argument('--device', type=int, default=-1, help='GPU id')
 	parser.add_argument('--feat_dim', type=int, default=-1, help='Feature dimension')
 	parser.add_argument('--embed_dim', type=int, default=256, help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[1024, 512], help='Encoder hidden layer dimension')
