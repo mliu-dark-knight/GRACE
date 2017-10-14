@@ -23,12 +23,8 @@ class Predictor(object):
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
 	def train(self):
-		if self.paras.device != -1:
-			with tf.device('/gpu:' + str(self.paras.device)):
-				model = GRACE(self.paras, self.graph)
-		else:
-			model = GRACE(self.paras, self.graph)
-		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)) as sess:
+		model = GRACE(self.paras, self.graph)
+		with tf.Session() as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
