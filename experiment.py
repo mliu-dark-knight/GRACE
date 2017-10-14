@@ -30,6 +30,8 @@ def run(num_exp, arg=None, val=None):
 			for process in batch_processes:
 				assert process.poll() is None
 			batch_processes = []
+			for j in range(10):
+				print
 	for process in processes:
 		process.wait()
 	for process in processes:
