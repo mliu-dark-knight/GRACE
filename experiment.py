@@ -13,6 +13,7 @@ def parse_args():
 
 def run(num_exp, arg=None, val=None):
 	num_device = sum(1 for device in device_lib.list_local_devices() if device.device_type == 'GPU')
+	num_device = 1
 	f1, jc, nmi = [], [], []
 	processes = []
 	batch_processes = []
