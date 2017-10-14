@@ -33,7 +33,7 @@ def run(num_exp, arg=None, val=None):
 			for process in batch_processes:
 				assert process.poll() is None
 			batch_processes = []
-			time.sleep(1)
+		time.sleep(1)
 	for process in processes:
 		process.wait()
 	for process in processes:
