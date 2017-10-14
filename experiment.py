@@ -1,17 +1,17 @@
 import argparse
-import sys
-import time
 import subprocess
+from multiprocessing import *
+
 import numpy as np
+
 from config import args
 from predictor import Predictor
-from multiprocessing import *
 
 
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--num_exp', type=int, default=10, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=4, help='Number of GPU, change to 0 if not using CPU')
+	parser.add_argument('--num_device', type=int, default=1, help='Number of GPU, change to 0 if not using CPU')
 	return parser.parse_args()
 
 
@@ -28,6 +28,7 @@ def run(num_exp):
 	processes = []
 	batch_processes = []
 	for i in range(num_exp):
+		print 'process %d' % i
 		device_id = -1 if local_args.num_device == 0 else i % local_args.num_device
 		if local_args.num_device != 0:
 			args.device = device_id
@@ -43,7 +44,7 @@ def run(num_exp):
 	for process in processes:
 		process.join()
 
-	for process in processes:
+	for _ in processes:
 		f1, jc, nmi = queue.get()
 		f1_list.append(f1)
 		jc_list.append(jc)
