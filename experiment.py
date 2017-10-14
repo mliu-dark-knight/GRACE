@@ -9,7 +9,7 @@ import numpy as np
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--num_exp', type=int, default=10, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=4, help='Number of GPU, change to 0 if not using GPU')
+	parser.add_argument('--num_device', type=int, default=1, help='Number of GPU, change to 0 if not using GPU')
 	return parser.parse_args()
 
 
