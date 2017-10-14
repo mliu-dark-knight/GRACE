@@ -1,15 +1,16 @@
 from __future__ import print_function
-import pickle
+
 import os
-import tensorflow as tf
 from copy import deepcopy
-from tqdm import tqdm
+
+import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
-from sklearn.preprocessing import MultiLabelBinarizer
-from utils import *
+from tqdm import tqdm
+
 from GRACE import GRACE
 from evaluate import f1_community, jc_community, nmi_community
+from utils import *
 
 
 class Predictor(object):
@@ -54,8 +55,6 @@ class Predictor(object):
 			# print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
-			# kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(self.embedding)
-			# self.prediction = MultiLabelBinarizer().fit_transform([[label] for label in kmeans.labels_])
 
 	def plot(self):
 		# scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
@@ -66,7 +65,6 @@ class Predictor(object):
 		return f1_community(prediction, ground_truth), jc_community(prediction, ground_truth), nmi_community(prediction, ground_truth)
 
 	def dump(self):
-		# pickle.dump(self.embedding, open(self.paras.model_file, 'wb'))
 		with open(self.paras.predict_file, 'w') as f:
 			for prediction in self.prediction:
 				f.write(','.join(map(str, prediction)) + '\n')

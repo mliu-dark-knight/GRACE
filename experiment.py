@@ -10,8 +10,20 @@ from predictor import Predictor
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--num_exp', type=int, default=10, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=4, help='Number of GPU, change to 0 if not using CPU')
+	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
+	parser.add_argument('--num_device', type=int, default=1, help='Number of GPU, change to 0 if not using CPU')
+
+	parser.add_argument('--embed_dim', type=list, default=[256], help='Embedding dimension')
+	parser.add_argument('--encoder_hidden', type=list, default=[[1024, 512]], help='Encoder hidden layer dimension')
+	parser.add_argument('--keep_prob', type=list, default=[0.5], help='Keep probability of dropout')
+	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
+	parser.add_argument('--lambda_r', type=list, default=[1.0], help='Reconstruct loss coefficient')
+	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
+	parser.add_argument('--optimizer', type=list, default=['Adam'], help='Optimizer [Adam, Momentum, GradientDescent, RMSProp, Adagrad]')
+	parser.add_argument('--pre_epoch', type=list, default=[1], help=None)
+	parser.add_argument('--pre_step', type=list, default=[1], help=None)
+	parser.add_argument('--epoch', type=list, default=[1], help=None)
+	parser.add_argument('--step', type=list, default=[1], help=None)
 	return parser.parse_args()
 
 
@@ -53,7 +65,31 @@ def run(num_exp):
 
 if __name__ == '__main__':
 	local_args = parse_args()
-	f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
-	print 'f1 mean %f, std %f' % (f1_mean, f1_std)
-	print 'jc mean %f, std %f' % (jc_mean, jc_std)
-	print 'nmi mean %f, std %f' % (nmi_mean, nmi_std)
+	for embed_dim in local_args.embed_dim:
+		args.embed_dim = embed_dim
+		for encoder_hidden in local_args.encoder_hidden:
+			args.encoder_hidden, args.decoder_hidden = encoder_hidden, list(reversed(encoder_hidden))
+			for keep_prob in local_args.keep_prob:
+				args.keep_prob = keep_prob
+				for BN in local_args.BN:
+					args.BN = BN
+					for lambda_r in local_args.lambda_r:
+						args.lambda_r = lambda_r
+						for lambda_c in local_args.lambda_c:
+							args.lambda_c = lambda_c
+							for optimizer in local_args.optimizer:
+								args.optimizer = optimizer
+								for pre_epoch in local_args.pre_epoch:
+									args.pre_epoch = pre_epoch
+									for pre_step in local_args.pre_step:
+										args.pre_step = pre_step
+										for epoch in local_args.epoch:
+											args.epoch = epoch
+											for step in local_args.step:
+												args.step = step
+
+												print args
+												f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
+												print 'f1 mean %f, std %f' % (f1_mean, f1_std)
+												print 'jc mean %f, std %f' % (jc_mean, jc_std)
+												print 'nmi mean %f, std %f' % (nmi_mean, nmi_std)
