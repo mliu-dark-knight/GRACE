@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+import time
 from subprocess import *
 from tensorflow.python.client import device_lib
 
@@ -12,7 +13,6 @@ def parse_args():
 
 def run(num_exp, arg=None, val=None):
 	num_device = sum(1 for device in device_lib.list_local_devices() if device.device_type == 'GPU')
-	num_device = 1
 	f1, jc, nmi = [], [], []
 	processes = []
 	batch_processes = []
@@ -26,16 +26,12 @@ def run(num_exp, arg=None, val=None):
 		if num_device != 0:
 			batch_processes.append(process)
 		if num_device != 0 and len(batch_processes) == num_device:
-			print len(processes), len(batch_processes)
-			for j in range(20):
-				print
 			for process in batch_processes:
 				process.wait()
 			for process in batch_processes:
 				assert process.poll() is None
 			batch_processes = []
-			for j in range(20):
-				print
+			time.sleep(1)
 	for process in processes:
 		process.wait()
 	for process in processes:
