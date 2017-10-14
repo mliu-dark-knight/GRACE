@@ -26,10 +26,12 @@ def run(num_exp, arg=None, val=None):
 			batch_processes.append(process)
 		if num_device != 0 and len(batch_processes) == num_device:
 			for process in batch_processes:
-				process.join()
+				process.wait()
+			for process in batch_processes:
+				assert process.poll() is None
 			batch_processes = []
 	for process in processes:
-		process.join()
+		process.wait()
 	for process in processes:
 		for line in process.stdout:
 			if 'score' in line:
