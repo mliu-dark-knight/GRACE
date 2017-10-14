@@ -18,15 +18,15 @@ def run(num_exp, arg=None, val=None):
 	processes = []
 	batch_processes = []
 	for i in range(num_exp):
-		device_id = -1 if arg.num_device == 0 else i % arg.num_device
+		device_id = -1 if args.num_device == 0 else i % args.num_device
 		if arg:
 			process = Popen('python2 main.py --%s %s --device %d' % (arg, val, device_id), shell=True, stdout=PIPE)
 		else:
 			process = Popen('python2 main.py --device %d' % device_id, shell=True, stdout=PIPE)
 		processes.append(process)
-		if arg.num_device != 0:
+		if args.num_device != 0:
 			batch_processes.append(process)
-		if arg.num_device != 0 and len(batch_processes) == arg.num_device:
+		if args.num_device != 0 and len(batch_processes) == args.num_device:
 			for process in batch_processes:
 				process.wait()
 			for process in batch_processes:
