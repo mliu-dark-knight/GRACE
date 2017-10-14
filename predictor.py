@@ -23,6 +23,7 @@ class Predictor(object):
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
 	def train(self):
+		tf.reset_default_graph()
 		model = GRACE(self.paras, self.graph)
 		with tf.Session() as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
