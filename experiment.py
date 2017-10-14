@@ -14,6 +14,7 @@ def run(num_exp, arg=None, val=None):
 	num_device = sum(1 for device in device_lib.list_local_devices() if device.device_type == 'GPU')
 	f1, jc, nmi = [], [], []
 	processes = []
+	batch_processes = []
 	for i in range(num_exp):
 		device_id = -1 if num_device == 0 else i % num_device
 		if arg:
@@ -21,6 +22,12 @@ def run(num_exp, arg=None, val=None):
 		else:
 			process = Popen('python2 main.py --device %d' % (device_id), shell=True, stdout=PIPE)
 		processes.append(process)
+		if num_device != 0:
+			batch_processes.append(process)
+		if num_device != 0 and len(batch_processes) == num_device:
+			for process in batch_processes:
+				process.wait()
+			batch_processes = []
 	for process in processes:
 		process.wait()
 	for process in processes:
