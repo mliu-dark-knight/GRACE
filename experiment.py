@@ -41,8 +41,7 @@ def run(num_exp):
 	batch_processes = []
 	for i in range(num_exp):
 		device_id = -1 if local_args.num_device == 0 else i % local_args.num_device
-		if local_args.num_device != 0:
-			args.device = device_id
+		args.device = device_id
 		process = Process(target=worker)
 		process.start()
 		processes.append(process)
