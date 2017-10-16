@@ -27,7 +27,7 @@ class Predictor(object):
 	def train(self):
 		if self.paras.device >= 0:
 			os.environ['CUDA_VISIBLE_DEVICES'] = str(self.paras.device)
-			with tf.device('/gpu:' + str(self.paras.device)):
+			with tf.device('/gpu:0'):
 				model = GRACE(self.paras, self.graph)
 		else:
 			with tf.device('/cpu:0'):
