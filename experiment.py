@@ -42,6 +42,8 @@ def run(num_exp):
 	for i in range(num_exp):
 		device_id = -1 if local_args.num_device == 0 else i % local_args.num_device
 		args.device = device_id
+		print device_id
+		print args
 		process = Process(target=worker)
 		process.start()
 		processes.append(process)
