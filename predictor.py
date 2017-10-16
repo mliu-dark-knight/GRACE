@@ -30,6 +30,7 @@ class Predictor(object):
 			with tf.device('/gpu:0'):
 				model = GRACE(self.paras, self.graph)
 		else:
+			os.environ['CUDA_VISIBLE_DEVICES'] = ''
 			with tf.device('/cpu:0'):
 				model = GRACE(self.paras, self.graph)
 		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
