@@ -33,8 +33,8 @@ class Graph(object):
 				edges[tuple[0]].add(tuple[1])
 				edges[tuple[1]].add(tuple[0])
 		for v, ns in edges.items():
-			assert v not in ns
-			edges[v].add(v)
+			if v not in ns:
+				edges[v].add(v)
 
 		indices = []
 		T_values, L1_values, L2_values, RI_values, RW_values = [], [], [], [], []
