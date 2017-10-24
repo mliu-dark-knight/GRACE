@@ -12,7 +12,7 @@ def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--num_exp', type=int, default=1, help='Number of experiment')
 	parser.add_argument('--num_device', type=int, default=0, help='Number of GPU, change to 0 if not using CPU')
-
+	parser.add_argument('--devices', type=list, default=[], help='Available GPU')
 	parser.add_argument('--embed_dim', type=list, default=[256], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[1024, 512]], help='Encoder hidden layer dimension')
 	parser.add_argument('--keep_prob', type=list, default=[0.4] * 4, help='Keep probability of dropout')
@@ -40,7 +40,7 @@ def run(num_exp):
 	processes = []
 	batch_processes = []
 	for i in range(num_exp):
-		device_id = -1 if local_args.num_device == 0 else i % local_args.num_device
+		device_id = -1 if local_args.num_device == 0 else local_args.devices[i % local_args.num_device]
 		args.device = device_id
 		process = Process(target=worker)
 		process.start()
