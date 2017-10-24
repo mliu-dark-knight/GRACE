@@ -15,10 +15,6 @@ class GRACE(object):
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
 		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
-		# graph Laplacian 1
-		self.L1 = tf.SparseTensor(indices=graph.indices, values=graph.L1_values, dense_shape=dense_shape)
-		# graph Laplacian 2
-		self.L2 = tf.SparseTensor(indices=graph.indices, values=graph.L2_values, dense_shape=dense_shape)
 		# influence propagation
 		self.RI = tf.Variable(graph.RI, trainable=False, dtype=tf.float32)
 		# random walk propagation
@@ -66,8 +62,6 @@ class GRACE(object):
 		if transition_function == 'T':
 			for i in range(self.paras.random_walk_step):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
-		elif transition_function in ['L1', 'L2']:
-			Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
 		elif transition_function in ['RI', 'RW']:
 			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
 		else:

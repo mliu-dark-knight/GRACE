@@ -2,5 +2,6 @@
 .gitignore
 .idea/
 data/
-*pyc
+*.pyc
 .DS_Store
+*.txt
