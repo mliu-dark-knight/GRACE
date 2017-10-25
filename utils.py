@@ -58,9 +58,9 @@ class Graph(object):
 		self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
 		self.RW /= np.sum(self.RW, axis=0)
 
-	@staticmethod
-	def load_graph(feature_file, graph_file, cluster_file, alpha, lambda_):
-		return Graph(feature_file, graph_file, cluster_file, alpha, lambda_)
+
+def load_graph(feature_file, graph_file, cluster_file, alpha, lambda_):
+	return Graph(feature_file, graph_file, cluster_file, alpha, lambda_)
 
 
 def scatter(data, cluster, plot_file):

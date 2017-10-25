@@ -1,13 +1,16 @@
 from __future__ import print_function
 
 import os
+import subprocess
 from copy import deepcopy
+from multiprocessing import *
 
 import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 
+from config import *
 from GRACE import GRACE
 from evaluate import f1_community, jc_community, nmi_community
 from utils import *
@@ -16,7 +19,7 @@ from utils import *
 class Predictor(object):
 	def __init__(self, paras):
 		self.paras = deepcopy(paras)
-		self.graph = Graph.load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha, self.paras.lambda_)
+		self.graph = load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha, paras.lambda_)
 		self.reset_paras()
 
 	def reset_paras(self):
@@ -25,6 +28,7 @@ class Predictor(object):
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
 	def train(self):
+		tf.reset_default_graph()
 		if self.paras.device >= 0:
 			os.environ['CUDA_VISIBLE_DEVICES'] = str(self.paras.device)
 			with tf.device('/gpu:0'):
@@ -76,3 +80,29 @@ class Predictor(object):
 
 	def tSNE(self):
 		return TSNE(n_components=2).fit_transform(self.embedding)
+
+
+def initialize_predictors(args):
+	predictors = []
+	if args.dataset in ['facebook', 'twitter']:
+		data_dir = base_dir(args)
+		dataset = args.dataset
+		processes = []
+		queue = Queue()
+		for subdir in os.listdir(data_dir):
+			if subdir == '.DS_Store':
+				continue
+			args.dataset = dataset + '/' + subdir
+			init_dir(args)
+			subprocess.call('rm ' + args.model_dir + '*', shell=True)
+			process = Process(target=lambda : queue.put(Predictor(args)))
+			process.start()
+			processes.append(process)
+		for _ in processes:
+			predictors.append(queue.get())
+		for process in processes:
+			process.join()
+	else:
+		subprocess.call('rm ' + args.model_dir + '*', shell=True)
+		predictors.append(Predictor(args))
+	return predictors
