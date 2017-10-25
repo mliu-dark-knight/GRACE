@@ -5,23 +5,22 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--devices', type=list, default=[], help='Available GPU')
-	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=0, help='Number of GPU, change to 0 if not using CPU')
+	parser.add_argument('--devices', type=list, default=[1, 2, 3], help='Available GPU')
+	parser.add_argument('--num_exp', type=int, default=6, help='Number of experiment')
+	parser.add_argument('--num_device', type=int, default=3, help='Number of GPU, change to 0 if not using CPU')
 	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[256]], help='Encoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
 	parser.add_argument('--random_walk_step', type=list, default=[0], help='Number of random walk steps')
 	parser.add_argument('--keep_prob', type=list, default= [0.4], help='Keep probability of dropout')
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
-	parser.add_argument('--lambda_r', type=list, default=[1.0], help='Reconstruct loss coefficient')
-	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
+	parser.add_argument('--lambda_c', type=list, default=[0.3], help='Clustering loss coefficient')
 	parser.add_argument('--optimizer', type=list, default=['Adam'], help='Optimizer [Adam, Momentum, GradientDescent, RMSProp, Adagrad]')
-	parser.add_argument('--pre_epoch', type=list, default=[1], help=None)
-	parser.add_argument('--pre_step', type=list, default=[1], help=None)
-	parser.add_argument('--epoch', type=list, default=[1], help=None)
-	parser.add_argument('--step', type=list, default=[1], help=None)
-	parser.add_argument('--dataset', type=list, default=['cora', 'facebook'], help=None)
+	parser.add_argument('--pre_epoch', type=list, default=[100], help=None)
+	parser.add_argument('--pre_step', type=list, default=[30], help=None)
+	parser.add_argument('--epoch', type=list, default=[30], help=None)
+	parser.add_argument('--step', type=list, default=[30], help=None)
+	parser.add_argument('--dataset', type=list, default=['facebook'], help=None)
 	return parser.parse_args()
 
 
@@ -70,6 +69,7 @@ def run(num_exp):
 
 if __name__ == '__main__':
 	local_args = parse_args()
+	f = open('results.txt', 'w')
 	for embed_dim in local_args.embed_dim:
 		args.embed_dim = embed_dim
 		for encoder_hidden in local_args.encoder_hidden:
@@ -78,30 +78,29 @@ if __name__ == '__main__':
 				args.keep_prob = keep_prob
 				for BN in local_args.BN:
 					args.BN = BN
-					for lambda_r in local_args.lambda_r:
-						args.lambda_r = lambda_r
-						for lambda_c in local_args.lambda_c:
-							args.lambda_c = lambda_c
-							for optimizer in local_args.optimizer:
-								args.optimizer = optimizer
-								for pre_epoch in local_args.pre_epoch:
-									args.pre_epoch = pre_epoch
-									for pre_step in local_args.pre_step:
-										args.pre_step = pre_step
-										for epoch in local_args.epoch:
-											args.epoch = epoch
-											for step in local_args.step:
-												args.step = step
-												for transition_function in local_args.transition_function:
-													args.transition_function = transition_function
-													for random_walk_step in local_args.random_walk_step:
-														args.random_walk_step = random_walk_step
-														for dataset in local_args.dataset:
-															args.dataset = dataset
-															init_dir(args)
+					for lambda_c in local_args.lambda_c:
+						args.lambda_c = lambda_c
+						for optimizer in local_args.optimizer:
+							args.optimizer = optimizer
+							for pre_epoch in local_args.pre_epoch:
+								args.pre_epoch = pre_epoch
+								for pre_step in local_args.pre_step:
+									args.pre_step = pre_step
+									for epoch in local_args.epoch:
+										args.epoch = epoch
+										for step in local_args.step:
+											args.step = step
+											for transition_function in local_args.transition_function:
+												args.transition_function = transition_function
+												for random_walk_step in local_args.random_walk_step:
+													args.random_walk_step = random_walk_step
+													for dataset in local_args.dataset:
+														args.dataset = dataset
+														init_dir(args)
 
-															print(args)
-															f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
-															print('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-															print('jc mean %f, std %f\n' % (jc_mean, jc_std))
-															print('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
+														#f.write(args)
+														f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
+														f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
+														#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
+														#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
+	f.close()
