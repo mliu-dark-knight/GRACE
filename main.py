@@ -1,10 +1,6 @@
 from __future__ import print_function
-import os
-import subprocess
-import numpy as np
-from config import *
-from predictor import *
 
+from predictor import *
 
 if __name__ == '__main__':
 	predictors = initialize_predictors(args)
