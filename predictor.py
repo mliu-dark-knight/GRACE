@@ -5,13 +5,12 @@ import subprocess
 from copy import deepcopy
 from multiprocessing import *
 
-import tensorflow as tf
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 
+from GRACE import *
 from config import *
-from GRACE import GRACE
 from evaluate import f1_community, jc_community, nmi_community
 from utils import *
 
@@ -27,16 +26,97 @@ class Predictor(object):
 		self.paras.num_node = len(self.graph.feature)
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
+	def batch(self):
+		random_idx = np.random.randint(self.paras.batch_size, size=self.paras.num_node)
+		RI = self.graph.RI[:, random_idx] if self.paras.transition_function == 'RI' else None
+		RW = self.graph.RW[:, random_idx] if self.paras.transition_function == 'RW' else None
+		return RI, RW
+
+	def fit(self, model, sess):
+		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
+			for _ in range(self.paras.pre_step):
+				if self.paras.dense_graph:
+					sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
+		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
+
+		Z = sess.run(model.Z_transform, feed_dict={model.training: False})
+		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
+		model.init_mean(kmeans.cluster_centers_, sess)
+
+		self.diff = []
+		s_prev = model.predict(sess)
+		for _ in tqdm(range(self.paras.epoch), ncols=100):
+			P = model.get_P(sess)
+			for _ in range(self.paras.step):
+				sess.run(model.gradient_descent, feed_dict={model.training: True, model.P: P})
+			s = model.predict(sess)
+			self.diff.append(np.sum(s_prev != s) / 2.0)
+			s_prev = s
+		P = model.get_P(sess)
+		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
+		print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
+		self.embedding = model.get_embedding(sess)
+		self.prediction = model.predict(sess)
+
+	def feed_dict(self, model, RI, RW):
+		feed_dict = {}
+		if RI is not None:
+			feed_dict.update({model.RI: RI})
+		if RW is not None:
+			feed_dict.update({model.RW: RW})
+		return feed_dict
+
+	def fit_dense(self, model, sess):
+		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
+			for _ in range(self.paras.pre_step):
+				if self.paras.dense_graph:
+					RI, RW = self.batch()
+					feed_dict = {model.training: True}
+					feed_dict.update(self.feed_dict(model, RI, RW))
+					sess.run(model.pre_gradient_descent, feed_dict=feed_dict)
+		RI, RW = self.graph.RI, self.graph.RW
+		feed_dict = {model.training: False}
+		feed_dict.update(self.feed_dict(model, RI, RW))
+		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict=feed_dict))
+
+		Z = sess.run(model.Z_transform, feed_dict=feed_dict)
+		kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
+		model.init_mean(kmeans.cluster_centers_, sess)
+
+		self.diff = []
+		s_prev = model.predict(sess, RI, RW)
+		for _ in tqdm(range(self.paras.epoch), ncols=100):
+			RI, RW = self.graph.RI, self.graph.RW
+			P = model.get_P(sess, RI, RW)
+			for _ in range(self.paras.step):
+				RI, RW = self.batch()
+				feed_dict = {model.training: True, model.P: P}
+				feed_dict.update(self.feed_dict(model, RI, RW))
+				sess.run(model.gradient_descent, feed_dict=feed_dict)
+			RI, RW = self.graph.RI, self.graph.RW
+			s = model.predict(sess, RI, RW)
+			self.diff.append(np.sum(s_prev != s) / 2.0)
+			s_prev = s
+
+		RI, RW = self.graph.RI, self.graph.RW
+		P = model.get_P(sess, RI, RW)
+		feed_dict = {model.training: False, model.P: P}
+		feed_dict.update(self.feed_dict(model, RI, RW))
+		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict=feed_dict))
+		print('clustering loss: %f' % sess.run(model.loss_c, feed_dict=feed_dict))
+		self.embedding = model.get_embedding(sess)
+		self.prediction = model.predict(sess, RI, RW)
+
 	def train(self):
 		tf.reset_default_graph()
 		if self.paras.device >= 0:
 			os.environ['CUDA_VISIBLE_DEVICES'] = str(self.paras.device)
 			with tf.device('/gpu:0'):
-				model = GRACE(self.paras, self.graph)
+				model = GRACE_Dense(self.paras, self.graph) if self.paras.dense_graph else GRACE(self.paras, self.graph)
 		else:
 			os.environ['CUDA_VISIBLE_DEVICES'] = ''
 			with tf.device('/cpu:0'):
-				model = GRACE(self.paras, self.graph)
+				model = GRACE_Dense(self.paras, self.graph) if self.paras.dense_graph else GRACE(self.paras, self.graph)
 		with tf.Session(config=tf.ConfigProto(
 				allow_soft_placement=True,
 				gpu_options=tf.GPUOptions(
@@ -44,30 +124,10 @@ class Predictor(object):
 					allow_growth=True))) as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
-			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
-				for _ in range(self.paras.pre_step):
-					sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
-			# print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
-
-			Z = sess.run(model.Z_transform, feed_dict={model.training: False})
-			kmeans = KMeans(n_clusters=self.paras.num_cluster).fit(Z)
-			model.init_mean(kmeans.cluster_centers_, sess)
-
-			self.diff = []
-			s_prev = model.predict(sess)
-			for _ in tqdm(range(self.paras.epoch), ncols=100):
-				P = model.get_P(sess)
-				for _ in range(self.paras.step):
-					sess.run(model.gradient_descent, feed_dict={model.training: True, model.P: P})
-				s = model.predict(sess)
-				self.diff.append(np.sum(s_prev != s) / 2.0)
-				s_prev = s
-			P = model.get_P(sess)
-			# print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
-			# print('clustering loss: %f' % sess.run(model.loss_c, feed_dict={model.training: False, model.P: P}))
-			# print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
-			self.embedding = model.get_embedding(sess)
-			self.prediction = model.predict(sess)
+			if self.paras.dense_graph:
+				self.fit_dense(model, sess)
+			else:
+				self.fit(model, sess)
 		os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 	def plot(self):

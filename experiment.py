@@ -8,7 +8,6 @@ def parse_args():
 	parser.add_argument('--devices', type=list, default=[1, 2, 3], help='Available GPU')
 	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
 	parser.add_argument('--num_device', type=int, default=3, help='Number of GPU, change to 0 if not using CPU')
-	parser.add_argument('--batch_gpu_process', type=int, default=8, help='Number of processes allowed on one GPU')
 	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[256]], help='Encoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
@@ -21,11 +20,10 @@ def parse_args():
 	parser.add_argument('--pre_step', type=list, default=[1], help=None)
 	parser.add_argument('--epoch', type=list, default=[1], help=None)
 	parser.add_argument('--step', type=list, default=[1], help=None)
-	parser.add_argument('--dataset', type=list, default=['facebook'], help=None)
 	return parser.parse_args()
 
 
-def worker(predictors, queue, batch):
+def worker(predictors, queue, batch=args.batch_gpu_process):
 	'''
 	:param predictors: one predictor per ego network
 	:return:
@@ -70,7 +68,7 @@ def run(num_exp):
 		device_id = -1 if local_args.num_device == 0 else local_args.devices[i % local_args.num_device]
 		for predictor in predictors:
 			predictor.paras.device = device_id
-		process = Process(target=worker, args=(predictors, queue, local_args.batch_gpu_process,))
+		process = Process(target=worker, args=(predictors, queue,))
 		process.start()
 		processes.append(process)
 		if local_args.num_device != 0:
@@ -117,13 +115,10 @@ if __name__ == '__main__':
 												args.transition_function = transition_function
 												for random_walk_step in local_args.random_walk_step:
 													args.random_walk_step = random_walk_step
-													for dataset in local_args.dataset:
-														args.dataset = dataset
-														init_dir(args)
 
-														#f.write(args)
-														f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
-														f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-														f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
-														#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
+													#f.write(args)
+													f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
+													f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
+													f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
+													#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
 	f.close()

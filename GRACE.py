@@ -55,9 +55,9 @@ class GRACE(object):
 		Z = self.Z
 		if transition_function == 'T':
 			for i in range(self.paras.random_walk_step):
-				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), self.Z)
+				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
 		elif transition_function in ['RI', 'RW']:
-			Z = tf.matmul(self.__getattribute__(transition_function), self.Z, transpose_a=True)
+			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')
 		if self.paras.BN:
@@ -90,3 +90,53 @@ class GRACE(object):
 
 	def predict(self, sess):
 		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0), feed_dict={self.training: False})
+
+
+
+class GRACE_Dense(GRACE):
+	def build_variable(self, graph):
+		self.training = tf.placeholder(tf.bool)
+		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
+		# influence propagation
+		self.RI = tf.placeholder(tf.float32, [None, self.paras.num_node])
+		# random walk propagation
+		self.RW = tf.placeholder(tf.float32, [None, self.paras.num_node])
+		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
+		self.P = tf.placeholder(tf.float32, [None, self.paras.num_cluster])
+		self.Z = self.encode()
+		self.Z_transform = self.transform()
+		self.Q = self.build_Q()
+
+	def transform(self):
+		transition_function = self.paras.transition_function
+		Z = self.Z
+		if transition_function in ['RI', 'RW']:
+			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
+		else:
+			raise ValueError('Invalid transition function')
+		if self.paras.BN:
+			Z = batch_normalization(Z, 'Z')
+		return Z
+
+	def get_P(self, sess):
+		raise NotImplementedError
+
+	def predict(self, sess):
+		raise NotImplementedError
+
+	def get_P(self, sess, RI=None, RW=None):
+		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
+		feed_dict = {self.training: False}
+		if RI is not None:
+			feed_dict.update({self.RI: RI})
+		if RW is not None:
+			feed_dict.update({self.RW: RW})
+		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True), feed_dict=feed_dict)
+
+	def predict(self, sess, RI=None, RW=None):
+		feed_dict = {self.training: False}
+		if RI is not None:
+			feed_dict.update({self.RI: RI})
+		if RW is not None:
+			feed_dict.update({self.RW: RW})
+		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0), feed_dict=feed_dict)
