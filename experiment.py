@@ -6,7 +6,7 @@ from predictor import *
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--devices', type=list, default=[1, 2, 3], help='Available GPU')
-	parser.add_argument('--num_exp', type=int, default=6, help='Number of experiment')
+	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
 	parser.add_argument('--num_device', type=int, default=3, help='Number of GPU, change to 0 if not using CPU')
 	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[256]], help='Encoder hidden layer dimension')
@@ -16,10 +16,10 @@ def parse_args():
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
 	parser.add_argument('--lambda_c', type=list, default=[0.3], help='Clustering loss coefficient')
 	parser.add_argument('--optimizer', type=list, default=['Adam'], help='Optimizer [Adam, Momentum, GradientDescent, RMSProp, Adagrad]')
-	parser.add_argument('--pre_epoch', type=list, default=[100], help=None)
-	parser.add_argument('--pre_step', type=list, default=[30], help=None)
-	parser.add_argument('--epoch', type=list, default=[30], help=None)
-	parser.add_argument('--step', type=list, default=[30], help=None)
+	parser.add_argument('--pre_epoch', type=list, default=[1], help=None)
+	parser.add_argument('--pre_step', type=list, default=[1], help=None)
+	parser.add_argument('--epoch', type=list, default=[1], help=None)
+	parser.add_argument('--step', type=list, default=[1], help=None)
 	parser.add_argument('--dataset', type=list, default=['facebook'], help=None)
 	return parser.parse_args()
 

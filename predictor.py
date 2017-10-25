@@ -64,6 +64,7 @@ class Predictor(object):
 			# print('l2 loss: %f' % sess.run(model.loss_2, feed_dict={model.training: False}))
 			self.embedding = model.get_embedding(sess)
 			self.prediction = model.predict(sess)
+		os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 	def plot(self):
 		# scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
