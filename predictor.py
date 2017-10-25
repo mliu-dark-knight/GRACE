@@ -37,7 +37,11 @@ class Predictor(object):
 			os.environ['CUDA_VISIBLE_DEVICES'] = ''
 			with tf.device('/cpu:0'):
 				model = GRACE(self.paras, self.graph)
-		with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+		with tf.Session(config=tf.ConfigProto(
+				allow_soft_placement=True,
+				gpu_options=tf.GPUOptions(
+					per_process_gpu_memory_fraction=self.paras.gpu_memory_fraction,
+					allow_growth=True))) as sess:
 			tf.summary.FileWriter(self.paras.model_dir, graph=sess.graph)
 			sess.run(tf.global_variables_initializer())
 			for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
