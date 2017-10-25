@@ -24,18 +24,39 @@ def parse_args():
 	return parser.parse_args()
 
 
-def worker(predictors, queue):
+def worker(predictors, queue, batch=8):
 	'''
 	:param predictors: one predictor per ego network
 	:return:
 	'''
-	f1_list, jc_list, nmi_list = [], [], []
-	for predictor in predictors:
+	def sub_worker(predictor):
 		predictor.train()
 		f1, jc, nmi = predictor.evaluate()
+		sub_queue.put((f1, jc, nmi))
+
+	f1_list, jc_list, nmi_list = [], [], []
+	processes = []
+	sub_queue = Queue()
+	for i, predictor in enumerate(predictors):
+		process = Process(target=sub_worker, args=(predictor,))
+		process.start()
+		processes.append(process)
+		if len(processes) == batch:
+			for _ in processes:
+				f1, jc, nmi = sub_queue.get()
+				f1_list.append(f1)
+				jc_list.append(jc)
+				nmi_list.append(nmi)
+			for process in processes:
+				process.join()
+			processes = []
+	for _ in processes:
+		f1, jc, nmi = sub_queue.get()
 		f1_list.append(f1)
 		jc_list.append(jc)
 		nmi_list.append(nmi)
+	for process in processes:
+		process.join()
 	queue.put((np.mean(f1_list), np.mean(jc_list), np.mean(nmi_list)))
 
 def run(num_exp):
@@ -102,6 +123,6 @@ if __name__ == '__main__':
 														#f.write(args)
 														f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
 														f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-														#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
+														f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
 														#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
 	f.close()

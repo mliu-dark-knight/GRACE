@@ -16,6 +16,7 @@ class Config():
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--device', type=int, default=0, help='Device id')
+	parser.add_argument('--gpu_memory_fraction', type=float, default=1.0 / 16.0, help='fraction of gpu memory per process')
 	parser.add_argument('--feat_dim', type=int, default=-1, help='Feature dimension')
 	parser.add_argument('--embed_dim', type=int, default=64, help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[256], help='Encoder hidden layer dimension')
