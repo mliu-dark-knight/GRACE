@@ -97,6 +97,9 @@ class GRACE_Dense(GRACE):
 	def build_variable(self, graph):
 		self.training = tf.placeholder(tf.bool)
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
+		dense_shape = [self.paras.num_node, self.paras.num_node]
+		# random walk outgoing
+		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
 		# influence propagation
 		self.RI = tf.placeholder(tf.float32, [self.paras.num_node, None])
 		# random walk propagation
@@ -115,7 +118,10 @@ class GRACE_Dense(GRACE):
 	def transform(self):
 		transition_function = self.paras.transition_function
 		Z = self.Z
-		if transition_function in ['RI', 'RW']:
+		if transition_function == 'T':
+			for i in range(self.paras.random_walk_step):
+				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+		elif transition_function in ['RI', 'RW']:
 			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
 			raise ValueError('Invalid transition function')

@@ -7,6 +7,7 @@ from multiprocessing import *
 
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 from tqdm import tqdm
 
 from GRACE import *
@@ -129,7 +130,7 @@ class Predictor(object):
 		os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 	def plot(self):
-		scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
+		scatter(self.reduce_dimension(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
 		# plot(self.diff, self.paras.plot_file)
 
 	def evaluate(self):
@@ -141,8 +142,9 @@ class Predictor(object):
 			for prediction in self.prediction:
 				f.write(','.join(map(str, prediction)) + '\n')
 
-	def tSNE(self):
-		return TSNE(n_components=2).fit_transform(self.embedding)
+	def reduce_dimension(self):
+		return PCA(n_components=2).fit_transform(self.embedding)
+		# return TSNE(n_components=2).fit_transform(self.embedding)
 
 
 def initialize_predictors(args):
