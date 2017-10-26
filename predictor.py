@@ -147,7 +147,7 @@ class Predictor(object):
 
 def initialize_predictors(args):
 	predictors = []
-	if args.dataset in ['facebook', 'twitter']:
+	if args.dataset in ['facebook', 'twitter', 'gplus']:
 		data_dir = base_dir(args)
 		dataset = args.dataset
 		processes = []

@@ -5,18 +5,18 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
-	parser.add_argument('--encoder_hidden', type=list, default=[[256]], help='Encoder hidden layer dimension')
+	parser.add_argument('--embed_dim', type=list, default=[512], help='Embedding dimension')
+	parser.add_argument('--encoder_hidden', type=list, default=[[512]], help='Encoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
 	parser.add_argument('--random_walk_step', type=list, default=[0], help='Number of random walk steps')
-	parser.add_argument('--keep_prob', type=list, default= [0.4], help='Keep probability of dropout')
+	parser.add_argument('--keep_prob', type=list, default= [0.5], help='Keep probability of dropout')
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
-	parser.add_argument('--lambda_c', type=list, default=[0.3], help='Clustering loss coefficient')
+	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
 	parser.add_argument('--optimizer', type=list, default=['Adam'], help='Optimizer [Adam, Momentum, GradientDescent, RMSProp, Adagrad]')
-	parser.add_argument('--pre_epoch', type=list, default=[1], help=None)
-	parser.add_argument('--pre_step', type=list, default=[1], help=None)
-	parser.add_argument('--epoch', type=list, default=[1], help=None)
-	parser.add_argument('--step', type=list, default=[1], help=None)
+	parser.add_argument('--pre_epoch', type=list, default=[100], help=None)
+	parser.add_argument('--pre_step', type=list, default=[10], help=None)
+	parser.add_argument('--epoch', type=list, default=[30], help=None)
+	parser.add_argument('--step', type=list, default=[30], help=None)
 	return parser.parse_args()
 
 
