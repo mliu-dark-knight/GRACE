@@ -15,6 +15,9 @@ class Config():
 
 def parse_args():
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--devices', type=list, default=[1, 2, 3], help='Available GPU')
+	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
+	parser.add_argument('--num_device', type=int, default=3, help='Number of GPU, change to 0 if not using CPU')
 	parser.add_argument('--device', type=int, default=0, help='Device id')
 	parser.add_argument('--gpu_memory_fraction', type=float, default=1.0 / 16.0, help='fraction of gpu memory per process')
 	parser.add_argument('--batch_gpu_process', type=int, default=8, help='Number of processes allowed on one GPU')
@@ -39,19 +42,19 @@ def parse_args():
 	parser.add_argument('--step', type=int, default=1, help=None)
 	parser.add_argument('--epsilon', type=float, default=1.0, help='Annealing hyperparameter for cluster assignment')
 	parser.add_argument('--dataset', type=str, default='cora', help=None)
-	parser.add_argument('--dense_graph', type=bool, default=True, help='Set to True when using large graph')
+	parser.add_argument('--dense_graph', type=bool, default=False, help='Set to True when using large graph')
 	return parser.parse_args()
 
 
 def init_dir(args):
-	data_dir = base_dir(args)
-	args.model_dir = data_dir + 'model/'
-	args.feature_file = data_dir + 'feature.txt'
-	args.edge_file = data_dir + 'edge.txt'
-	args.cluster_file = data_dir + 'cluster.txt'
-	args.model_file = data_dir + 'model.pkl'
-	args.plot_file = data_dir + 'plot.png'
-	args.predict_file = data_dir + 'prediction.txt'
+	args.data_dir = base_dir(args)
+	args.model_dir = args.data_dir + 'model/'
+	args.feature_file = args.data_dir + 'feature.txt'
+	args.edge_file = args.data_dir + 'edge.txt'
+	args.cluster_file = args.data_dir + 'cluster.txt'
+	args.model_file = args.data_dir + 'model.pkl'
+	args.plot_file = args.data_dir + 'plot.png'
+	args.predict_file = args.data_dir + 'prediction.txt'
 
 def base_dir(args):
 	return 'data/' + args.dataset + '/' if sys.platform == 'darwin' else \

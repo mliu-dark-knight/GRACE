@@ -5,9 +5,6 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--devices', type=list, default=[1, 2, 3], help='Available GPU')
-	parser.add_argument('--num_exp', type=int, default=2, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=3, help='Number of GPU, change to 0 if not using CPU')
 	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[256]], help='Encoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
@@ -65,15 +62,15 @@ def run(num_exp):
 	processes = []
 	batch_processes = []
 	for i in range(num_exp):
-		device_id = -1 if local_args.num_device == 0 else local_args.devices[i % local_args.num_device]
+		device_id = -1 if args.num_device == 0 else args.devices[i % args.num_device]
 		for predictor in predictors:
 			predictor.paras.device = device_id
 		process = Process(target=worker, args=(predictors, queue,))
 		process.start()
 		processes.append(process)
-		if local_args.num_device != 0:
+		if args.num_device != 0:
 			batch_processes.append(process)
-		if local_args.num_device != 0 and len(batch_processes) == local_args.num_device:
+		if args.num_device != 0 and len(batch_processes) == args.num_device:
 			for process in batch_processes:
 				process.join()
 			batch_processes = []
@@ -117,7 +114,7 @@ if __name__ == '__main__':
 													args.random_walk_step = random_walk_step
 
 													#f.write(args)
-													f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(local_args.num_exp)
+													f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(args.num_exp)
 													f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
 													f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
 													#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))

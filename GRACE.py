@@ -98,14 +98,19 @@ class GRACE_Dense(GRACE):
 		self.training = tf.placeholder(tf.bool)
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
 		# influence propagation
-		self.RI = tf.placeholder(tf.float32, [None, self.paras.num_node])
+		self.RI = tf.placeholder(tf.float32, [self.paras.num_node, None])
 		# random walk propagation
-		self.RW = tf.placeholder(tf.float32, [None, self.paras.num_node])
+		self.RW = tf.placeholder(tf.float32, [self.paras.num_node, None])
 		self.mean = weight('mean', [self.paras.num_cluster, self.paras.embed_dim])
 		self.P = tf.placeholder(tf.float32, [None, self.paras.num_cluster])
 		self.Z = self.encode()
 		self.Z_transform = self.transform()
 		self.Q = self.build_Q()
+
+	def build_loss_c(self):
+		loss_c = tf.reduce_mean(self.P * tf.log(self.P / self.Q))
+		loss_c = tf.verify_tensor_all_finite(loss_c, 'check nan')
+		return loss_c
 
 	def transform(self):
 		transition_function = self.paras.transition_function

@@ -18,7 +18,7 @@ from utils import *
 class Predictor(object):
 	def __init__(self, paras):
 		self.paras = deepcopy(paras)
-		self.graph = load_graph(paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha, paras.lambda_)
+		self.graph = load_graph(paras.data_dir, paras.feature_file, paras.edge_file, paras.cluster_file, paras.alpha, paras.lambda_)
 		self.reset_paras()
 
 	def reset_paras(self):
@@ -27,10 +27,10 @@ class Predictor(object):
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
 	def batch(self):
-		random_idx = np.random.randint(self.paras.batch_size, size=self.paras.num_node)
-		RI = self.graph.RI[:, random_idx] if self.paras.transition_function == 'RI' else None
-		RW = self.graph.RW[:, random_idx] if self.paras.transition_function == 'RW' else None
-		return RI, RW
+		batch_indices = np.random.randint(self.paras.num_node, size=self.paras.batch_size)
+		RI = self.graph.RI[:, batch_indices] if self.paras.transition_function == 'RI' else None
+		RW = self.graph.RW[:, batch_indices] if self.paras.transition_function == 'RW' else None
+		return batch_indices, RI, RW
 
 	def fit(self, model, sess):
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
@@ -70,7 +70,7 @@ class Predictor(object):
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 			for _ in range(self.paras.pre_step):
 				if self.paras.dense_graph:
-					RI, RW = self.batch()
+					_, RI, RW = self.batch()
 					feed_dict = {model.training: True}
 					feed_dict.update(self.feed_dict(model, RI, RW))
 					sess.run(model.pre_gradient_descent, feed_dict=feed_dict)
@@ -89,8 +89,8 @@ class Predictor(object):
 			RI, RW = self.graph.RI, self.graph.RW
 			P = model.get_P(sess, RI, RW)
 			for _ in range(self.paras.step):
-				RI, RW = self.batch()
-				feed_dict = {model.training: True, model.P: P}
+				batch_indices, RI, RW = self.batch()
+				feed_dict = {model.training: True, model.P: P[batch_indices]}
 				feed_dict.update(self.feed_dict(model, RI, RW))
 				sess.run(model.gradient_descent, feed_dict=feed_dict)
 			RI, RW = self.graph.RI, self.graph.RW

@@ -9,10 +9,10 @@ from scipy.sparse.linalg import inv
 
 
 class Graph(object):
-	def __init__(self, feature_file, edge_file, cluster_file, alpha, lambda_):
-		self.init(feature_file, edge_file, cluster_file, alpha, lambda_)
+	def __init__(self, base_dir, feature_file, edge_file, cluster_file, alpha, lambda_):
+		self.init(base_dir, feature_file, edge_file, cluster_file, alpha, lambda_)
 
-	def init(self, feature_file, edge_file, cluster_file, alpha, lambda_):
+	def init(self, base_dir, feature_file, edge_file, cluster_file, alpha, lambda_):
 		feature = []
 		with open(feature_file) as f:
 			for line in f:
@@ -54,13 +54,23 @@ class Graph(object):
 		self.indices = np.array(indices)
 		self.T_values = np.asarray(T_values, dtype=np.float32)
 
-		self.RI = inv(csc_matrix((RI_values, (self.indices[:, 1], self.indices[:, 0])), shape=(len(edges), len(edges)))).todense()
-		self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])), shape=(len(edges), len(edges)))).todense()
-		self.RW /= np.sum(self.RW, axis=0)
+		try:
+			self.RI = np.load(base_dir + 'RI.npy')
+		except:
+			self.RI = inv(csc_matrix((RI_values, (self.indices[:, 1], self.indices[:, 0])),
+			                         shape=(len(edges), len(edges)))).todense()
+			np.save(base_dir + 'RI.npy', self.RI)
+		try:
+			self.RW = np.load(base_dir + 'RW.npy')
+		except:
+			self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])),
+			                                   shape=(len(edges), len(edges)))).todense()
+			self.RW /= np.sum(self.RW, axis=0)
+			np.save(base_dir + 'RW.npy', self.RW)
 
 
-def load_graph(feature_file, graph_file, cluster_file, alpha, lambda_):
-	return Graph(feature_file, graph_file, cluster_file, alpha, lambda_)
+def load_graph(base_dir, feature_file, graph_file, cluster_file, alpha, lambda_):
+	return Graph(base_dir, feature_file, graph_file, cluster_file, alpha, lambda_)
 
 
 def scatter(data, cluster, plot_file):
