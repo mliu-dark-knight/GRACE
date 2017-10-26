@@ -15,12 +15,12 @@ class Config():
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--devices', type=list, default=[3], help='Available GPU')
-	parser.add_argument('--num_exp', type=int, default=3, help='Number of experiment')
-	parser.add_argument('--num_device', type=int, default=1, help='Number of GPU, change to 0 if not using CPU')
+	parser.add_argument('--devices', type=list, default=[2, 3], help='Available GPU')
+	parser.add_argument('--num_exp', type=int, default=4, help='Number of experiment')
+	parser.add_argument('--num_device', type=int, default=2, help='Number of GPU, change to 0 if not using CPU')
 	parser.add_argument('--device', type=int, default=-1, help='Device id')
-	parser.add_argument('--gpu_memory_fraction', type=float, default=1.0 / 10.0, help='fraction of gpu memory per process')
-	parser.add_argument('--batch_gpu_process', type=int, default= 9, help='Number of processes allowed on one GPU')
+	parser.add_argument('--gpu_memory_fraction', type=float, default=1.0, help='fraction of gpu memory per process')
+	parser.add_argument('--batch_gpu_process', type=int, default= 1, help='Number of processes allowed on one GPU')
 	parser.add_argument('--batch_size', type=int, default=1024, help='Batch size')
 	parser.add_argument('--feat_dim', type=int, default=-1, help='Feature dimension')
 	parser.add_argument('--embed_dim', type=int, default=64, help='Embedding dimension')
@@ -41,8 +41,8 @@ def parse_args():
 	parser.add_argument('--epoch', type=int, default=1, help=None)
 	parser.add_argument('--step', type=int, default=1, help=None)
 	parser.add_argument('--epsilon', type=float, default=1.0, help='Annealing hyperparameter for cluster assignment')
-	parser.add_argument('--dataset', type=str, default='gplus', help=None)
-	parser.add_argument('--dense_graph', type=bool, default=False, help='Set to True when using large graph')
+	parser.add_argument('--dataset', type=str, default='pubmed', help=None)
+	parser.add_argument('--dense_graph', type=bool, default=True, help='Set to True when using large graph')
 	return parser.parse_args()
 
 

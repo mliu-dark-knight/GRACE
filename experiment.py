@@ -5,8 +5,8 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--embed_dim', type=list, default=[512], help='Embedding dimension')
-	parser.add_argument('--encoder_hidden', type=list, default=[[512]], help='Encoder hidden layer dimension')
+	parser.add_argument('--embed_dim', type=list, default=[500], help='Embedding dimension')
+	parser.add_argument('--encoder_hidden', type=list, default=[[], [500], [500, 500], [500, 500, 500]], help='Encoder hidden layer dimension')
 	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
 	parser.add_argument('--random_walk_step', type=list, default=[0], help='Number of random walk steps')
 	parser.add_argument('--keep_prob', type=list, default= [0.5], help='Keep probability of dropout')
@@ -116,6 +116,6 @@ if __name__ == '__main__':
 													#f.write(args)
 													f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(args.num_exp)
 													f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-													f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
+													#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
 													#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
 	f.close()
