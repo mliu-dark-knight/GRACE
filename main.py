@@ -7,7 +7,7 @@ if __name__ == '__main__':
 	f1_list, jc_list, nmi_list = [], [], []
 	for predictor in predictors:
 		predictor.train()
-		# predictor.plot()
+		predictor.plot()
 		f1, jc, nmi = predictor.evaluate()
 		f1_list.append(f1)
 		jc_list.append(jc)

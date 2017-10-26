@@ -3,6 +3,7 @@ import numpy as np
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from random import shuffle
 from collections import defaultdict
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import inv
@@ -74,14 +75,21 @@ def load_graph(base_dir, feature_file, graph_file, cluster_file, alpha, lambda_)
 
 
 def scatter(data, cluster, plot_file):
-	colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+	colors = []
+	choices = [0.0, 0.5, 1.0]
+	for i in choices:
+		for j in choices:
+			for k in choices:
+				colors.append((i, j, k))
+	shuffle(colors)
 	assert len(set(cluster)) <= len(colors)
 	points_set = []
 	for cl in range(len(set(cluster))):
 		points_set.append(np.array([p for p, c in zip(data, cluster) if c == cl]))
 	plt.figure()
 	for i, points in enumerate(points_set):
-		plt.scatter(points[:, 0], points[:, 1], c=colors[i])
+		if len(points) > 0:
+			plt.scatter(points[:, 0], points[:, 1], c=colors[i])
 	plt.savefig(plot_file)
 	plt.close()
 

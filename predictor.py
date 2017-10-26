@@ -35,8 +35,7 @@ class Predictor(object):
 	def fit(self, model, sess):
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 			for _ in range(self.paras.pre_step):
-				if self.paras.dense_graph:
-					sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
+				sess.run(model.pre_gradient_descent, feed_dict={model.training: True})
 		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict={model.training: False}))
 
 		Z = sess.run(model.Z_transform, feed_dict={model.training: False})
@@ -69,11 +68,10 @@ class Predictor(object):
 	def fit_dense(self, model, sess):
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 			for _ in range(self.paras.pre_step):
-				if self.paras.dense_graph:
-					_, RI, RW = self.batch()
-					feed_dict = {model.training: True}
-					feed_dict.update(self.feed_dict(model, RI, RW))
-					sess.run(model.pre_gradient_descent, feed_dict=feed_dict)
+				_, RI, RW = self.batch()
+				feed_dict = {model.training: True}
+				feed_dict.update(self.feed_dict(model, RI, RW))
+				sess.run(model.pre_gradient_descent, feed_dict=feed_dict)
 		RI, RW = self.graph.RI, self.graph.RW
 		feed_dict = {model.training: False}
 		feed_dict.update(self.feed_dict(model, RI, RW))
@@ -131,8 +129,8 @@ class Predictor(object):
 		os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 	def plot(self):
-		# scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
-		plot(self.diff, self.paras.plot_file)
+		scatter(self.tSNE(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
+		# plot(self.diff, self.paras.plot_file)
 
 	def evaluate(self):
 		prediction, ground_truth = np.transpose(self.prediction), np.transpose(self.graph.cluster)
