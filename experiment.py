@@ -5,10 +5,10 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--embed_dim', type=list, default=[500], help='Embedding dimension')
-	parser.add_argument('--encoder_hidden', type=list, default=[[], [500], [500, 500], [500, 500, 500]], help='Encoder hidden layer dimension')
-	parser.add_argument('--transition_function', type=list, default=['RI'], help='Transition function [T, RI, RW]')
-	parser.add_argument('--random_walk_step', type=list, default=[0], help='Number of random walk steps')
+	parser.add_argument('--file_name', type=str, default='results_walk.txt', help='Output filename')
+	parser.add_argument('--embed_dim', type=list, default=[512], help='Embedding dimension')
+	parser.add_argument('--encoder_hidden', type=list, default=[[]], help='Encoder hidden layer dimension')
+	parser.add_argument('--random_walk_step', type=list, default=[0, 1, 2, 3], help='Number of random walk steps')
 	parser.add_argument('--keep_prob', type=list, default= [0.5], help='Keep probability of dropout')
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
 	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
@@ -87,7 +87,7 @@ def run(num_exp):
 
 if __name__ == '__main__':
 	local_args = parse_args()
-	f = open('results.txt', 'w')
+	f = open(local_args.file_name, 'w')
 	for embed_dim in local_args.embed_dim:
 		args.embed_dim = embed_dim
 		for encoder_hidden in local_args.encoder_hidden:
@@ -108,14 +108,12 @@ if __name__ == '__main__':
 										args.epoch = epoch
 										for step in local_args.step:
 											args.step = step
-											for transition_function in local_args.transition_function:
-												args.transition_function = transition_function
-												for random_walk_step in local_args.random_walk_step:
-													args.random_walk_step = random_walk_step
+											for random_walk_step in local_args.random_walk_step:
+												args.random_walk_step = random_walk_step
 
-													#f.write(args)
-													f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(args.num_exp)
-													f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-													#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
-													#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
+												#f.write(args)
+												f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(args.num_exp)
+												f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
+												#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
+												#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
 	f.close()
