@@ -79,7 +79,7 @@ class GRACE(object):
 		return fully_connected(hidden, self.paras.feat_dim, 'decoder_' + str(len(self.paras.decoder_hidden)), activation='linear')
 
 	def get_embedding(self, sess):
-		return sess.run(self.Z, feed_dict={self.training: False})
+		return sess.run(self.Z_transform, feed_dict={self.training: False})
 
 	def init_mean(self, mean, sess):
 		sess.run(self.mean.assign(mean))
@@ -126,22 +126,29 @@ class GRACE_Dense(GRACE):
 	def get_P(self, sess):
 		raise NotImplementedError
 
+	def get_embedding(self, sess):
+		raise NotImplementedError
+
 	def predict(self, sess):
 		raise NotImplementedError
 
-	def get_P(self, sess, RI=None, RW=None):
-		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
+	def get_dict(self, RI, RW):
 		feed_dict = {self.training: False}
 		if RI is not None:
 			feed_dict.update({self.RI: RI})
 		if RW is not None:
 			feed_dict.update({self.RW: RW})
+		return feed_dict
+
+	def get_P(self, sess, RI, RW):
+		feed_dict = self.get_dict(RI, RW)
+		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
 		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True), feed_dict=feed_dict)
 
+	def get_embedding(self, sess, RI, RW):
+		feed_dict = self.get_dict(RI, RW)
+		return sess.run(self.Z_transform, feed_dict=feed_dict)
+
 	def predict(self, sess, RI=None, RW=None):
-		feed_dict = {self.training: False}
-		if RI is not None:
-			feed_dict.update({self.RI: RI})
-		if RW is not None:
-			feed_dict.update({self.RW: RW})
+		feed_dict = self.get_dict(RI, RW)
 		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0), feed_dict=feed_dict)
