@@ -27,12 +27,6 @@ class Predictor(object):
 		self.paras.num_node = len(self.graph.feature)
 		self.paras.num_cluster = len(self.graph.cluster[0])
 
-	def batch(self):
-		batch_indices = np.random.randint(self.paras.num_node, size=self.paras.batch_size)
-		RI = self.graph.RI[:, batch_indices] if self.paras.transition_function == 'RI' else None
-		RW = self.graph.RW[:, batch_indices] if self.paras.transition_function == 'RW' else None
-		return batch_indices, RI, RW
-
 	def fit(self, model, sess):
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 			for _ in range(self.paras.pre_step):
@@ -58,24 +52,20 @@ class Predictor(object):
 		self.embedding = model.get_embedding(sess)
 		self.prediction = model.predict(sess)
 
-	def feed_dict(self, model, RI, RW):
-		feed_dict = {}
-		if RI is not None:
-			feed_dict.update({model.RI: RI})
-		if RW is not None:
-			feed_dict.update({model.RW: RW})
-		return feed_dict
+	def batch(self):
+		batch_indices = np.random.randint(self.paras.num_node, size=self.paras.batch_size)
+		RI = self.graph.RI[:, batch_indices] if self.paras.transition_function == 'RI' else None
+		RW = self.graph.RW[:, batch_indices] if self.paras.transition_function == 'RW' else None
+		return batch_indices, RI, RW
 
 	def fit_dense(self, model, sess):
+		indices, RI, RW = np.array(range(self.paras.num_node)), self.graph.RI, self.graph.RW
+
 		for _ in tqdm(range(self.paras.pre_epoch), ncols=100):
 			for _ in range(self.paras.pre_step):
-				_, RI, RW = self.batch()
-				feed_dict = {model.training: True}
-				feed_dict.update(self.feed_dict(model, RI, RW))
+				feed_dict = model.feed_dict(True, None, None, None)
 				sess.run(model.pre_gradient_descent, feed_dict=feed_dict)
-		RI, RW = self.graph.RI, self.graph.RW
-		feed_dict = {model.training: False}
-		feed_dict.update(self.feed_dict(model, RI, RW))
+		feed_dict = model.feed_dict(False, indices, RI, RW)
 		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict=feed_dict))
 
 		Z = sess.run(model.Z_transform, feed_dict=feed_dict)
@@ -83,28 +73,25 @@ class Predictor(object):
 		model.init_mean(kmeans.cluster_centers_, sess)
 
 		self.diff = []
-		s_prev = model.predict(sess, RI, RW)
+		s_prev = model.predict(sess, indices, RI, RW)
 		for _ in tqdm(range(self.paras.epoch), ncols=100):
-			RI, RW = self.graph.RI, self.graph.RW
-			P = model.get_P(sess, RI, RW)
+			P = model.get_P(sess, indices, RI, RW)
 			for _ in range(self.paras.step):
-				batch_indices, RI, RW = self.batch()
-				feed_dict = {model.training: True, model.P: P[batch_indices]}
-				feed_dict.update(self.feed_dict(model, RI, RW))
+				batch_indices, batch_RI, batch_RW = self.batch()
+				feed_dict = model.feed_dict(True, batch_indices, batch_RI, batch_RW)
+				feed_dict.update({model.P: P[batch_indices]})
 				sess.run(model.gradient_descent, feed_dict=feed_dict)
-			RI, RW = self.graph.RI, self.graph.RW
-			s = model.predict(sess, RI, RW)
+			s = model.predict(sess, indices, RI, RW)
 			self.diff.append(np.sum(s_prev != s) / 2.0)
 			s_prev = s
 
-		RI, RW = self.graph.RI, self.graph.RW
-		P = model.get_P(sess, RI, RW)
-		feed_dict = {model.training: False, model.P: P}
-		feed_dict.update(self.feed_dict(model, RI, RW))
+		P = model.get_P(sess, indices, RI, RW)
+		feed_dict = model.feed_dict(False, indices, RI, RW)
+		feed_dict.update({model.P: P})
 		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict=feed_dict))
 		print('clustering loss: %f' % sess.run(model.loss_c, feed_dict=feed_dict))
-		self.embedding = model.get_embedding(sess, RI, RW)
-		self.prediction = model.predict(sess, RI, RW)
+		self.embedding = model.get_embedding(sess, indices, RI, RW)
+		self.prediction = model.predict(sess, indices, RI, RW)
 
 	def train(self):
 		tf.reset_default_graph()

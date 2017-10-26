@@ -97,6 +97,7 @@ class GRACE_Dense(GRACE):
 	def build_variable(self, graph):
 		self.training = tf.placeholder(tf.bool)
 		self.X = tf.Variable(graph.feature, trainable=False, dtype=tf.float32)
+		self.random_indices = tf.placeholder(tf.int32, [None])
 		dense_shape = [self.paras.num_node, self.paras.num_node]
 		# random walk outgoing
 		self.T = tf.SparseTensor(indices=graph.indices, values=graph.T_values, dense_shape=dense_shape)
@@ -121,6 +122,7 @@ class GRACE_Dense(GRACE):
 		if transition_function == 'T':
 			for i in range(self.paras.random_walk_step):
 				Z = tf.sparse_tensor_dense_matmul(self.__getattribute__(transition_function), Z)
+			Z = tf.nn.embedding_lookup(Z, self.random_indices)
 		elif transition_function in ['RI', 'RW']:
 			Z = tf.matmul(self.__getattribute__(transition_function), Z, transpose_a=True)
 		else:
@@ -138,23 +140,25 @@ class GRACE_Dense(GRACE):
 	def predict(self, sess):
 		raise NotImplementedError
 
-	def get_dict(self, RI, RW):
-		feed_dict = {self.training: False}
+	def feed_dict(self, training, random_indices, RI, RW):
+		feed_dict = {self.training: training}
+		if random_indices is not None:
+			feed_dict.update({self.random_indices: random_indices})
 		if RI is not None:
 			feed_dict.update({self.RI: RI})
 		if RW is not None:
 			feed_dict.update({self.RW: RW})
 		return feed_dict
 
-	def get_P(self, sess, RI, RW):
-		feed_dict = self.get_dict(RI, RW)
+	def get_P(self, sess, random_indices, RI, RW):
+		feed_dict = self.feed_dict(False, random_indices, RI, RW)
 		P = tf.square(self.Q) / tf.reduce_sum(self.Q, axis=0)
 		return sess.run(P / tf.reduce_sum(P, axis=1, keep_dims=True), feed_dict=feed_dict)
 
-	def get_embedding(self, sess, RI, RW):
-		feed_dict = self.get_dict(RI, RW)
+	def get_embedding(self, sess, random_indices, RI, RW):
+		feed_dict = self.feed_dict(False, random_indices, RI, RW)
 		return sess.run(self.Z_transform, feed_dict=feed_dict)
 
-	def predict(self, sess, RI=None, RW=None):
-		feed_dict = self.get_dict(RI, RW)
+	def predict(self, sess, random_indices, RI, RW):
+		feed_dict = self.feed_dict(False, random_indices, RI, RW)
 		return sess.run(tf.one_hot(tf.argmax(self.Q, axis=1), depth=self.paras.num_cluster, on_value=1, off_value=0), feed_dict=feed_dict)
