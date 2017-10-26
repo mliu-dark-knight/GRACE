@@ -60,14 +60,14 @@ class Graph(object):
 		except:
 			self.RI = inv(csc_matrix((RI_values, (self.indices[:, 1], self.indices[:, 0])),
 			                         shape=(len(edges), len(edges)))).todense()
-			np.save(base_dir + 'RI.npy', self.RI)
+			np.save(base_dir + 'RI.npy', self.RI.astype(np.float32))
 		try:
 			self.RW = np.load(base_dir + 'RW.npy')
 		except:
 			self.RW = lambda_ * inv(csc_matrix((RW_values, (self.indices[:, 0], self.indices[:, 1])),
 			                                   shape=(len(edges), len(edges)))).todense()
 			self.RW /= np.sum(self.RW, axis=0)
-			np.save(base_dir + 'RW.npy', self.RW)
+			np.save(base_dir + 'RW.npy', self.RW.astype(np.float32))
 
 
 def load_graph(base_dir, feature_file, graph_file, cluster_file, alpha, lambda_):
@@ -76,7 +76,7 @@ def load_graph(base_dir, feature_file, graph_file, cluster_file, alpha, lambda_)
 
 def scatter(data, cluster, plot_file):
 	colors = []
-	choices = [0.0, 0.5, 1.0]
+	choices = [0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0]
 	for i in choices:
 		for j in choices:
 			for k in choices:

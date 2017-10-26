@@ -102,7 +102,7 @@ class Predictor(object):
 		feed_dict.update(self.feed_dict(model, RI, RW))
 		print('reconstruction loss: %f' % sess.run(model.loss_r, feed_dict=feed_dict))
 		print('clustering loss: %f' % sess.run(model.loss_c, feed_dict=feed_dict))
-		self.embedding = model.get_embedding(sess)
+		self.embedding = model.get_embedding(sess, RI, RW)
 		self.prediction = model.predict(sess, RI, RW)
 
 	def train(self):
