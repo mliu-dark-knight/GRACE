@@ -5,10 +5,11 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--file_name', type=str, default='results_walk.txt', help='Output filename')
-	parser.add_argument('--embed_dim', type=list, default=[512], help='Embedding dimension')
+	dim = 128
+	parser.add_argument('--file_name', type=str, default='results'+str(dim)+'.txt', help='Output filename')
+	parser.add_argument('--embed_dim', type=list, default=[dim], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[]], help='Encoder hidden layer dimension')
-	parser.add_argument('--random_walk_step', type=list, default=[0, 1, 2, 3], help='Number of random walk steps')
+	parser.add_argument('--random_walk_step', type=list, default=[0, 1, 2, 3, 4], help='Number of random walk steps')
 	parser.add_argument('--keep_prob', type=list, default= [0.5], help='Keep probability of dropout')
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
 	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
