@@ -54,6 +54,7 @@ def init_dir(args):
 	args.cluster_file = args.data_dir + 'cluster.txt'
 	args.model_file = args.data_dir + 'model.pkl'
 	args.plot_file = args.data_dir + 'plot.png'
+	args.scatter_file = args.data_dir + 'scatter.png'
 	args.predict_file = args.data_dir + 'prediction.txt'
 
 def base_dir(args):

@@ -5,19 +5,17 @@ from predictor import *
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	dim = 128
-	parser.add_argument('--file_name', type=str, default='results'+str(dim)+'.txt', help='Output filename')
-	parser.add_argument('--embed_dim', type=list, default=[dim], help='Embedding dimension')
+	parser.add_argument('--embed_dim', type=list, default=[64], help='Embedding dimension')
 	parser.add_argument('--encoder_hidden', type=list, default=[[]], help='Encoder hidden layer dimension')
-	parser.add_argument('--random_walk_step', type=list, default=[0, 1, 2, 3, 4], help='Number of random walk steps')
+	parser.add_argument('--random_walk_step', type=list, default=[4], help='Number of random walk steps')
 	parser.add_argument('--keep_prob', type=list, default= [0.5], help='Keep probability of dropout')
 	parser.add_argument('--BN', type=list, default=[False], help='Apply batch normalization')
 	parser.add_argument('--lambda_c', type=list, default=[0.2], help='Clustering loss coefficient')
 	parser.add_argument('--optimizer', type=list, default=['Adam'], help='Optimizer [Adam, Momentum, GradientDescent, RMSProp, Adagrad]')
-	parser.add_argument('--pre_epoch', type=list, default=[100], help=None)
-	parser.add_argument('--pre_step', type=list, default=[10], help=None)
-	parser.add_argument('--epoch', type=list, default=[30], help=None)
-	parser.add_argument('--step', type=list, default=[30], help=None)
+	parser.add_argument('--pre_epoch', type=list, default=[1], help=None)
+	parser.add_argument('--pre_step', type=list, default=[1], help=None)
+	parser.add_argument('--epoch', type=list, default=[1], help=None)
+	parser.add_argument('--step', type=list, default=[1], help=None)
 	return parser.parse_args()
 
 
@@ -88,7 +86,6 @@ def run(num_exp):
 
 if __name__ == '__main__':
 	local_args = parse_args()
-	f = open(local_args.file_name, 'w')
 	for embed_dim in local_args.embed_dim:
 		args.embed_dim = embed_dim
 		for encoder_hidden in local_args.encoder_hidden:
@@ -112,9 +109,8 @@ if __name__ == '__main__':
 											for random_walk_step in local_args.random_walk_step:
 												args.random_walk_step = random_walk_step
 
-												#f.write(args)
+												print(args)
 												f1_mean, f1_std, jc_mean, jc_std, nmi_mean, nmi_std = run(args.num_exp)
-												f.write('f1 mean %f, std %f\n' % (f1_mean, f1_std))
-												#f.write('jc mean %f, std %f\n' % (jc_mean, jc_std))
-												#f.write('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
-	f.close()
+												print('f1 mean %f, std %f\n' % (f1_mean, f1_std))
+												print('jc mean %f, std %f\n' % (jc_mean, jc_std))
+												print('nmi mean %f, std %f\n' % (nmi_mean, nmi_std))
