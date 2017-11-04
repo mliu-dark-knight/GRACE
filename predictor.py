@@ -117,7 +117,7 @@ class Predictor(object):
 		os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 	def plot(self):
-		scatter(self.reduce_dimension(), np.argmax(self.graph.cluster, axis=1), self.paras.plot_file)
+		scatter(self.reduce_dimension(), np.argmax(self.graph.cluster, axis=1), self.paras.scatter_file)
 		# plot(self.diff, self.paras.plot_file)
 
 	def evaluate(self):
